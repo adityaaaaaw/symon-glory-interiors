@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Glory Simon Interiors Site Visit Booking System
 
 A professional, business-oriented **Site Visit Booking & Scheduling CRM** built for Glory Simon Interiors. Drawing design inspiration from professional tools like Linear and Notion, it delivers a clean, high-end, premium SaaS user experience in a strict **Light Theme** (white, slate, and gold accents).
@@ -90,3 +91,6 @@ Click **Portal Login** on the landing page navbar and use the quick pre-fill but
 * **Client Role**:
   - Email: (Click any client button or use a seeded email, e.g. `amit.sharma1@example.com`)
   - Password: `client123`
+=======
+# symon-glory-interiors
+>>>>>>> 9438c9b9663c08cd5a338110cb7e9e2f37391f41
