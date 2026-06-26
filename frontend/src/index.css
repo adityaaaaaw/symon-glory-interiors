@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    /* scroll-behavior: smooth is disabled to prevent conflicts with Lenis & ScrollTrigger */
+  }
+  
+  body {
+    @apply font-inter bg-bgBase text-primary;
+  }
+
+
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-borderColor/60 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-secondary/30;
+  }
+
+
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+
+
+/* Luxury Accent Gold Glow */
+.gold-glow {
+  box-shadow: 0 4px 20px -2px rgba(212, 160, 23, 0.2);
+}
+
+/* Animated Pulse Skeleton for loading states */
+@keyframes skeleton-loading {
+  0% {
+    background-color: rgba(229, 231, 235, 0.6);
+  }
+  50% {
+    background-color: rgba(229, 231, 235, 0.9);
+  }
+  100% {
+    background-color: rgba(229, 231, 235, 0.6);
+  }
+}
+
+
+
+.skeleton {
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+}
+
+/* Smooth zoom transition */
+.zoom-hover {
+  @apply transition-transform duration-500 ease-out;
+}
+.zoom-hover:hover {
+  transform: scale(1.04);
+}
+
+/* Soft hover transition */
+.luxury-btn {
+  @apply transition-all duration-300 relative overflow-hidden;
+}
+
+.luxury-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: rgba(214, 160, 23, 0.1);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s ease-out;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.luxury-btn:hover::after {
+  transform: translate(-50%, -50%) scale(1);
+}
