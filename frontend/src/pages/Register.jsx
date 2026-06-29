@@ -1,41 +1,120 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useNotification } from '../context/NotificationContext';
+import React, { useRef, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import { User, Mail, Lock, Phone, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
-const Register = () => {
-  const { register } = useAuth();
-  const { addToast } = useNotification();
+export const Register = () => {
+  const { register, loading, showToast } = useApp();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-
-  // Form states
-  const [fullName, setFullName] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
+  // Field states
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState(''); // Stores raw 10 digits
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [pincode, setPincode] = useState('');
+  const phoneInputRef = useRef(null);
+  
+  // UX states
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [touched, setTouched] = useState({
+    name: false,
+    email: false,
+    phone: false,
+    password: false
+  });
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: ''
+  });
 
-  // Helper for displaying phone number: +91 XXXXX XXXXX
-  const formatPhoneDisplay = (raw) => {
-    if (!raw) return '';
-    const digits = raw.replace(/\D/g, '').slice(0, 10);
-    if (digits.length === 0) return '';
-    if (digits.length <= 5) {
-      return `+91 ${digits}`;
-    }
-    return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+  // Validation helper rules
+  const validateName = (val) => {
+    const trimmed = val.trim();
+    if (!trimmed) return 'Full Name is required.';
+    if (trimmed.length < 2) return 'Full Name must be at least 2 characters.';
+    if (!/^[A-Za-z\s]+$/.test(trimmed)) return 'Only letters and spaces are allowed.';
+    return '';
   };
 
-  // Change handler to format phone and keep cursor position stable
-  const handleMobileChange = (e) => {
+  const validateEmail = (val) => {
+    const trimmed = val.trim();
+    if (!trimmed) return 'Email Address is required.';
+    if (/^\d+$/.test(trimmed)) return 'Please enter a valid email address, not a phone number.';
+    // RFC-compliant email regex
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    if (!emailRegex.test(trimmed)) return 'Please enter a valid email address.';
+    return '';
+  };
+
+  const validatePhone = (val) => {
+    if (!val) return 'Phone Number is required.';
+    if (!/^\d{10}$/.test(val)) return 'Phone Number must be exactly 10 digits.';
+    return '';
+  };
+
+  const validatePassword = (val) => {
+    if (!val) return 'Password is required.';
+    if (val.length < 8) return 'Password must be at least 8 characters.';
+    if (val.length > 64) return 'Password cannot exceed 64 characters.';
+    if (!/[A-Z]/.test(val)) return 'Password must contain at least one uppercase letter.';
+    if (!/[a-z]/.test(val)) return 'Password must contain at least one lowercase letter.';
+    if (!/\d/.test(val)) return 'Password must contain at least one number.';
+    if (!/[@$!%*?&#]/.test(val)) return 'Password must contain at least one special character.';
+    return '';
+  };
+
+  // Run validation for a single field
+  const validateField = (field, val) => {
+    let msg = '';
+    if (field === 'name') msg = validateName(val);
+    else if (field === 'email') msg = validateEmail(val);
+    else if (field === 'phone') msg = validatePhone(val);
+    else if (field === 'password') msg = validatePassword(val);
+
+    setErrors(prev => ({ ...prev, [field]: msg }));
+    return msg;
+  };
+
+  // Input change handlers
+  const handleNameChange = (e) => {
+    let val = e.target.value;
+    // Allow only letters and spaces
+    val = val.replace(/[^A-Za-z\s]/g, '');
+    setName(val);
+    if (touched.name) {
+      validateField('name', val);
+    }
+  };
+
+  const handleNameBlur = () => {
+    setTouched(prev => ({ ...prev, name: true }));
+    // Trim and auto-capitalize each word on blur
+    const trimmed = name.trim();
+    if (trimmed) {
+      const capitalized = trimmed
+        .split(/\s+/)
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      setName(capitalized);
+      validateField('name', capitalized);
+    } else {
+      setName('');
+      validateField('name', '');
+    }
+  };
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    setEmail(val);
+    if (touched.email) {
+      validateField('email', val);
+    }
+  };
+
+  const handlePhoneChange = (e) => {
     const input = e.target;
     const originalValue = input.value;
     const selectionStart = input.selectionStart;
@@ -64,345 +143,357 @@ const Register = () => {
     }
     const rawDigits = val.replace(/\D/g, '').slice(0, 10);
 
-    setMobileNumber(rawDigits);
+    setPhone(rawDigits);
 
-    const formatted = formatPhoneDisplay(rawDigits);
+    if (touched.phone) {
+      validateField('phone', rawDigits);
+    }
 
     setTimeout(() => {
-      let newCursorPos = 0;
+      let newCaret = 0;
       if (rawDigits.length > 0) {
         if (digitsBeforeCursor === 0) {
-          newCursorPos = 4;
+          newCaret = 4;
         } else if (digitsBeforeCursor <= 5) {
-          newCursorPos = 4 + digitsBeforeCursor;
+          newCaret = 4 + digitsBeforeCursor;
         } else {
-          newCursorPos = 5 + digitsBeforeCursor;
+          newCaret = 5 + digitsBeforeCursor;
         }
       }
-      input.setSelectionRange(newCursorPos, newCursorPos);
+      const inputElement = phoneInputRef.current;
+      if (inputElement) {
+        const finalCaret = Math.min(newCaret, inputElement.value.length);
+        inputElement.setSelectionRange(finalCaret, finalCaret);
+      }
     }, 0);
   };
 
-  // Password strength meter rules
-  const getPasswordStrength = (pwd) => {
-    if (!pwd) return { score: 0, label: 'None', color: 'var(--color-subtle)' };
+  const handlePasswordChange = (e) => {
+    const val = e.target.value;
+    setPassword(val);
+    if (touched.password) {
+      validateField('password', val);
+    }
+  };
+
+  const handlePasswordPaste = (e) => {
+    const pastedText = e.clipboardData.getData('text');
+    if (pastedText.length > 64) {
+      e.preventDefault();
+      showToast('Pasting strings longer than 64 characters is not allowed.', 'error');
+    }
+  };
+
+  // Format phone number for UI display only: +91 XXXXX XXXXX
+  const formatPhoneForDisplay = (raw) => {
+    if (!raw) return '';
+    const digits = String(raw).replace(/\D/g, '').slice(0, 10);
+    if (digits.length === 0) return '';
+    if (digits.length <= 5) return `+91 ${digits}`;
+    return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+  };
+
+  const displayPhone = formatPhoneForDisplay(phone);
+
+  // Calculate live password strength
+  const getPasswordStrength = (val) => {
+    if (val.length < 8) return 'Weak';
     let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[a-z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    
-    switch (score) {
-      case 1: return { score: 1, label: 'Weak', color: 'var(--color-danger)' };
-      case 2: return { score: 2, label: 'Fair', color: 'var(--color-warning)' };
-      case 3: return { score: 3, label: 'Good', color: 'var(--color-info)' };
-      case 4: return { score: 4, label: 'Strong', color: 'var(--color-success)' };
-      default: return { score: 0, label: 'None', color: 'var(--color-subtle)' };
-    }
+    if (/[A-Z]/.test(val)) score++;
+    if (/[a-z]/.test(val)) score++;
+    if (/\d/.test(val)) score++;
+    if (/[@$!%*?&#]/.test(val)) score++;
+
+    if (score <= 2) return 'Weak';
+    if (score === 3) return 'Medium';
+    return 'Strong';
   };
 
-  const strength = getPasswordStrength(password);
+  const strength = password ? getPasswordStrength(password) : '';
 
-  const validateStep1 = () => {
-    if (!fullName || fullName.trim().length < 2) {
-      setError('Please enter your full name (minimum 2 characters).');
-      return false;
+  // Determine border and outline styles based on touched/error state
+  const getInputClassName = (field) => {
+    const baseClass = "block w-full pl-10 pr-10 py-3 border rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 text-sm transition-all bg-slate-50/30 font-medium";
+    if (!touched[field]) {
+      return `${baseClass} border-slate-200 focus:ring-[#C5A880]/30 focus:border-[#C5A880]`;
     }
-    if (!mobileNumber || !/^[6-9]\d{9}$/.test(mobileNumber)) {
-      setError('Please enter a valid 10-digit Indian mobile number.');
-      return false;
+    if (errors[field]) {
+      return `${baseClass} border-red-500 focus:ring-red-200 focus:border-red-500 bg-red-50/5`;
     }
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address.');
-      return false;
-    }
-    setError('');
-    return true;
+    return `${baseClass} border-green-500 focus:ring-green-200 focus:border-green-500 bg-green-50/5`;
   };
 
-  const handleNext = () => {
-    if (validateStep1()) {
-      setStep(2);
-    }
-  };
+  // Form validity check
+  const isFormValid =
+    name.trim() !== '' &&
+    validateName(name) === '' &&
+    email.trim() !== '' &&
+    validateEmail(email) === '' &&
+    phone.length === 10 &&
+    validatePhone(phone) === '' &&
+    password !== '' &&
+    validatePassword(password) === '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (!isFormValid || submitting || loading) return;
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      return;
-    }
-    if (strength.score < 4) {
-      setError('Password must contain uppercase, lowercase, and numeric characters.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-    if (!city || !pincode) {
-      setError('Please enter your city and pincode.');
-      return;
-    }
+    setSubmitting(true);
 
-    setLoading(true);
-    const payload = {
-      full_name: fullName.trim(),
-      mobile_number: mobileNumber.trim(),
-      email: email.trim(),
-      password,
-      address: address.trim(),
-      city: city.trim(),
-      pincode: pincode.trim(),
-    };
-    console.log('[Register] Submitting registration payload:', payload);
+    // Form final sanitization parameters
+    const trimmedName = name.trim();
+    const lowercaseEmail = email.trim().toLowerCase();
 
-    try {
-      const res = await register(payload);
-      console.log('[Register] API Response:', res);
-
-      if (res && res.success) {
-        setSuccess(true);
-        addToast('Registration successful! Welcome.', 'success');
-        setTimeout(() => {
-          navigate('/client');
-        }, 2000);
-      } else {
-        console.error('[Register] Failed response status or message:', res);
-        setError(res.message || 'Registration failed.');
-      }
-    } catch (err) {
-      console.error('[Register] Registration exception caught:', {
-        message: err.message,
-        status: err.status,
-        data: err.data
-      });
-      setError(err.data?.message || err.message || 'An error occurred during registration.');
-    } finally {
-      setLoading(false);
+    const res = await register(trimmedName, lowercaseEmail, password, phone);
+    if (res.success) {
+      navigate('/client/dashboard');
+    } else {
+      setTouched(prev => ({ ...prev, name: true, email: true, phone: true, password: true }));
+      setErrors(prev => ({
+        ...prev,
+        ...(res.field ? { [res.field]: res.message } : {})
+      }));
+      showToast(res.message || 'Registration failed. Please try again.', 'error');
     }
+    setSubmitting(false);
   };
 
   return (
-    <div className="register-page-container flex min-h-screen flex-col md:flex-row bg-bg">
-      {/* Left Branding Panel */}
-      <div 
-        className="register-branding-panel flex-1 flex flex-col justify-between p-8 md:p-16 text-left relative overflow-hidden bg-surface"
-        style={{
-          background: 'linear-gradient(135deg, hsl(30, 12%, 8%) 0%, hsl(30, 8%, 14%) 100%)',
-          borderRight: '1px solid var(--color-border)',
-          flex: '1.2'
-        }}
-      >
-        <div className="brand-logo-area">
-          <div className="text-gold font-bold mb-2" style={{ fontFamily: 'var(--font-heading)', fontSize: '80px', lineHeight: '1' }}>
-            GS
-          </div>
-          <h1 className="heading-xl text-cream font-bold m-0" style={{ letterSpacing: '2px' }}>GLORY SIMON</h1>
-          <p className="text-muted uppercase tracking-widest text-sm m-0">Interiors</p>
-          <div className="gold-divider w-24 h-1 my-6" style={{ background: 'var(--color-gold)' }}></div>
-        </div>
+    <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
+      
+      {/* Decorative luxury elements */}
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-[#C5A880]/5 blur-[120px]" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#1C1C1C]/5 blur-[120px]" />
 
-        <div className="brand-tagline-area max-w-lg mb-8 md:mb-0">
-          <p className="heading-md text-cream italic mb-8" style={{ fontWeight: '300' }}>
-            "Start your interior design journey today with our automated booking and assignment system."
-          </p>
-        </div>
-
-        <div className="brand-footer text-xs text-subtle">
-          © {new Date().getFullYear()} Glory Simon Interiors. All rights reserved.
-        </div>
+      <div className="w-full max-w-md mx-auto z-10 text-center">
+        <Link to="/" className="inline-flex items-center justify-center gap-2 mb-6">
+          <div className="w-10 h-10 rounded-xl bg-[#1C1C1C] flex items-center justify-center font-bold text-[#C5A880] text-xl shadow-md">G</div>
+          <span className="font-extrabold text-[#1C1C1C] tracking-tight text-xl">
+            Glory Simon <span className="text-[#C5A880] font-light">Studio</span>
+          </span>
+        </Link>
+        <h2 className="text-3xl font-extrabold text-[#1C1C1C] tracking-tight">
+          Create Account
+        </h2>
+        <p className="mt-2 text-sm text-[#5C5C5C]">
+          Or{' '}
+          <Link to="/login" className="font-medium text-[#C5A880] hover:text-[#b4956c] transition-colors">
+            sign in to your portal
+          </Link>
+        </p>
       </div>
 
-      {/* Right Form Panel */}
-      <div className="register-card-panel flex-1 flex items-center justify-center p-6 md:p-12">
-        <div className="card w-full max-w-md p-8 bg-surface-2 border border-border rounded-2xl shadow-2xl animate-slide-in">
-          {success ? (
-            <div className="text-center py-8">
-              <div className="success-icon text-gold text-5xl mb-4">✓</div>
-              <h2 className="heading-lg font-bold text-cream mb-2">Registration Successful!</h2>
-              <p className="text-muted text-sm">Logging you in and redirecting to dashboard...</p>
-              <div className="spinner sm mx-auto mt-4"></div>
-            </div>
-          ) : (
-            <>
-              <h2 className="heading-lg font-bold text-cream mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
-                Create Client Account
-              </h2>
-              <p className="text-muted text-sm mb-4">Step {step} of 2 — {step === 1 ? 'Personal details' : 'Security & Location'}</p>
+      <div className="mt-8 w-full max-w-md mx-auto z-10">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8 shadow-xl rounded-2xl border border-[#C5A880]/10">
 
-              {/* Progress bar */}
-              <div className="progress-bar-container bg-surface w-full h-1 rounded mb-6 overflow-hidden">
-                <div 
-                  className="progress-bar-fill h-full bg-gold transition-all duration-300"
-                  style={{ width: `${step * 50}%`, background: 'var(--color-gold)' }}
-                ></div>
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+            
+            {/* Full Name */}
+            <div>
+              <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Full Name
+              </label>
+              <div className="relative rounded-xl shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-4 w-4 text-[#C5A880]" />
+                </div>
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={handleNameChange}
+                  onBlur={handleNameBlur}
+                  autoComplete="name"
+                  aria-invalid={touched.name && errors.name ? "true" : "false"}
+                  aria-describedby={touched.name && errors.name ? "name-error" : undefined}
+                  className={`${getInputClassName('name')} min-h-[48px]`}
+                  placeholder="John Doe"
+                />
               </div>
+              {touched.name && errors.name && (
+                <div id="name-error" role="alert" className="text-[11px] text-red-650 mt-1.5 transition-all duration-200 font-medium">
+                  ✕ {errors.name}
+                </div>
+              )}
+            </div>
 
-              {error && (
-                <div className="text-danger bg-danger-bg border border-danger text-sm rounded p-3 mb-4 flex gap-2 items-center">
-                  <span>✗</span>
-                  <span>{error}</span>
+            {/* Email Address */}
+            <div>
+              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Email Address
+              </label>
+              <div className="relative rounded-xl shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-4 w-4 text-[#C5A880]" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={handleEmailChange}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, email: true }));
+                    validateField('email', email);
+                  }}
+                  autoComplete="email"
+                  aria-invalid={touched.email && errors.email ? "true" : "false"}
+                  aria-describedby={touched.email ? "email-helper" : undefined}
+                  className={`${getInputClassName('email')} min-h-[48px]`}
+                  placeholder="john@example.com"
+                />
+              </div>
+              {touched.email && (
+                <div id="email-helper" role="alert" className={`text-[11px] mt-1.5 transition-all duration-200 font-medium ${errors.email ? 'text-red-650' : 'text-green-600'}`}>
+                  {errors.email ? `✕ ${errors.email}` : '✓ Valid email'}
+                </div>
+              )}
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label htmlFor="phone" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Phone Number
+              </label>
+              <div className="relative rounded-xl shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-4 w-4 text-[#C5A880]" />
+                </div>
+                <input
+                  ref={phoneInputRef}
+                  id="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength="14"
+                  required
+                  value={displayPhone}
+                  onChange={handlePhoneChange}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, phone: true }));
+                    validateField('phone', phone);
+                  }}
+                  autoComplete="tel"
+                  aria-invalid={touched.phone && errors.phone ? "true" : "false"}
+                  aria-describedby={touched.phone && errors.phone ? "phone-error" : undefined}
+                  className={`${getInputClassName('phone')} min-h-[48px]`}
+                  placeholder="+91 98765 43210"
+                />
+              </div>
+              {touched.phone && errors.phone && (
+                <div id="phone-error" role="alert" className="text-[11px] text-red-650 mt-1.5 transition-all duration-200 font-medium">
+                  ✕ {errors.phone}
+                </div>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                Password
+              </label>
+              <div className="relative rounded-xl shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-[#C5A880]" />
+                </div>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onPaste={handlePasswordPaste}
+                  onBlur={() => {
+                    setTouched(prev => ({ ...prev, password: true }));
+                    validateField('password', password);
+                  }}
+                  autoComplete="new-password"
+                  aria-invalid={touched.password && errors.password ? "true" : "false"}
+                  aria-describedby={touched.password && errors.password ? "password-error" : undefined}
+                  className={`${getInputClassName('password')} min-h-[48px]`}
+                  placeholder="••••••••"
+                />
+                
+                {/* Toggle Show/Hide Password */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(prev => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#C5A880] hover:text-[#b4956c] transition-colors"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {touched.password && errors.password && (
+                <div id="password-error" role="alert" className="text-[11px] text-red-650 mt-1.5 transition-all duration-200 font-medium">
+                  ✕ {errors.password}
                 </div>
               )}
 
-              {step === 1 ? (
-                /* Step 1: Personal Info */
-                <div className="flex flex-col gap-4">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-name">Full Name</label>
-                    <input
-                      id="reg-name"
-                      type="text"
-                      className="form-input"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                    />
+              {/* Password Strength Meter */}
+              {password && (
+                <div className="mt-3 space-y-1.5 animate-fadeIn">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                    <span className="text-slate-500">Password Strength</span>
+                    <span className={
+                      strength === 'Strong' ? 'text-green-600' :
+                      strength === 'Medium' ? 'text-amber-600' : 'text-red-500'
+                    }>{strength}</span>
                   </div>
-
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-mobile">Mobile Number (Indian)</label>
-                    <input
-                      id="reg-mobile"
-                      type="tel"
-                      className="form-input"
-                      placeholder="+91 98765 43210"
-                      maxLength="14"
-                      value={formatPhoneDisplay(mobileNumber)}
-                      onChange={handleMobileChange}
-                      required
-                    />
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex gap-1">
+                    <div className={`h-full flex-1 rounded-full transition-all duration-300 ${
+                      password.length >= 8 ? (strength === 'Strong' ? 'bg-green-500' : strength === 'Medium' ? 'bg-amber-500' : 'bg-red-500') : 'bg-red-500'
+                    }`}></div>
+                    <div className={`h-full flex-1 rounded-full transition-all duration-300 ${
+                      password.length >= 8 && (strength === 'Medium' || strength === 'Strong') ? (strength === 'Strong' ? 'bg-green-500' : strength === 'Medium' ? 'bg-amber-500' : 'bg-red-500') : 'bg-slate-200'
+                    }`}></div>
+                    <div className={`h-full flex-1 rounded-full transition-all duration-300 ${
+                      password.length >= 8 && strength === 'Strong' ? 'bg-green-500' : 'bg-slate-200'
+                    }`}></div>
                   </div>
-
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-email">Email Address</label>
-                    <input
-                      id="reg-email"
-                      type="email"
-                      className="form-input"
-                      placeholder="john@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-2 text-[10px] text-slate-500">
+                    <div className={/[a-z]/.test(password) ? 'text-green-600 font-bold' : ''}>
+                      {/[a-z]/.test(password) ? '✓' : '•'} Lowercase letter
+                    </div>
+                    <div className={/[A-Z]/.test(password) ? 'text-green-600 font-bold' : ''}>
+                      {/[A-Z]/.test(password) ? '✓' : '•'} Uppercase letter
+                    </div>
+                    <div className={/\d/.test(password) ? 'text-green-600 font-bold' : ''}>
+                      {/\d/.test(password) ? '✓' : '•'} Numeric character
+                    </div>
+                    <div className={/[@$!%*?&#]/.test(password) ? 'text-green-600 font-bold' : ''}>
+                      {/[@$!%*?&#]/.test(password) ? '✓' : '•'} Special character
+                    </div>
                   </div>
-
-                  <button type="button" className="btn btn-primary w-full py-3 mt-4" onClick={handleNext}>
-                    Continue &rarr;
-                  </button>
                 </div>
-              ) : (
-                /* Step 2: Location and Security */
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-password">Password</label>
-                    <input
-                      id="reg-password"
-                      type="password"
-                      className="form-input"
-                      placeholder="At least 8 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    {password && (
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-muted">Strength: <span style={{ color: strength.color, fontWeight: 'bold' }}>{strength.label}</span></span>
-                        <div className="flex gap-1">
-                          {Array.from({ length: 4 }).map((_, i) => (
-                            <div 
-                              key={i} 
-                              className="w-4 h-1 rounded" 
-                              style={{ 
-                                backgroundColor: i < strength.score ? strength.color : 'var(--color-border)' 
-                              }}
-                            ></div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-confirm">Confirm Password</label>
-                    <input
-                      id="reg-confirm"
-                      type="password"
-                      className="form-input"
-                      placeholder="Repeat password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="reg-address">Street Address (Optional)</label>
-                    <textarea
-                      id="reg-address"
-                      className="form-textarea"
-                      placeholder="Apartment, building, street..."
-                      rows="2"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    ></textarea>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="reg-city">City</label>
-                      <input
-                        id="reg-city"
-                        type="text"
-                        className="form-input"
-                        placeholder="e.g. Mumbai"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label className="form-label" htmlFor="reg-pincode">Pincode</label>
-                      <input
-                        id="reg-pincode"
-                        type="text"
-                        className="form-input"
-                        placeholder="400001"
-                        maxLength="6"
-                        value={pincode}
-                        onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between gap-4 mt-4">
-                    <button type="button" className="btn btn-secondary w-full" onClick={() => setStep(1)} disabled={loading}>
-                      &larr; Back
-                    </button>
-                    <button type="submit" className="btn btn-primary w-full" disabled={loading}>
-                      {loading ? 'Submitting...' : 'Register'}
-                    </button>
-                  </div>
-                </form>
               )}
+            </div>
 
-              <p className="text-center text-sm text-muted mt-6 m-0">
-                Already registered?{' '}
-                <Link to="/login" className="text-gold font-semibold decoration-none">
-                  Login Here
-                </Link>
-              </p>
-            </>
-          )}
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading || submitting || !isFormValid}
+                className="w-full min-h-[48px] flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C1C] hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {loading || submitting ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    Create Account
+                    <ArrowRight className="w-4 h-4 text-[#C5A880]" />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6 text-center text-xs text-slate-400">
+            By creating an account, you agree to our Terms of Service and Privacy Policy.
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-export default Register;
