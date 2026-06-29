@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { User, Mail, Lock, Phone, ArrowRight, Eye, EyeOff } from 'lucide-react';
@@ -12,6 +12,7 @@ export const Register = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState(''); // Stores raw 10 digits
   const [password, setPassword] = useState('');
+  const phoneInputRef = useRef(null);
   
   // UX states
   const [showPassword, setShowPassword] = useState(false);
@@ -114,11 +115,36 @@ export const Register = () => {
   };
 
   const handlePhoneChange = (e) => {
-    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    const input = e.target.value;
+    const digits = input.replace(/\D/g, '').slice(0, 10);
+    const cursorPosition = e.target.selectionStart ?? input.length;
+    const digitsBeforeCursor = input.slice(0, cursorPosition).replace(/\D/g, '').length;
+
     setPhone(digits);
+
     if (touched.phone) {
       validateField('phone', digits);
     }
+
+    requestAnimationFrame(() => {
+      const inputElement = phoneInputRef.current;
+      if (!inputElement) return;
+
+      let caretPosition = 0;
+      const prefixLength = 4;
+      const digitsCount = Math.min(digitsBeforeCursor, digits.length);
+
+      if (digitsCount === 0) {
+        caretPosition = 0;
+      } else if (digitsCount <= 5) {
+        caretPosition = prefixLength + digitsCount;
+      } else {
+        caretPosition = prefixLength + 5 + 1 + (digitsCount - 5);
+      }
+
+      const nextCaret = Math.min(caretPosition, inputElement.value.length);
+      inputElement.setSelectionRange(nextCaret, nextCaret);
+    });
   };
 
   const handlePasswordChange = (e) => {
@@ -144,6 +170,8 @@ export const Register = () => {
     if (digits.length > 5) return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
     return `+91 ${digits}`;
   };
+
+  const displayPhone = formatPhoneForDisplay(phone);
 
   // Calculate live password strength
   const getPasswordStrength = (val) => {
@@ -311,12 +339,13 @@ export const Register = () => {
                   <Phone className="h-4 w-4 text-[#C5A880]" />
                 </div>
                 <input
+                  ref={phoneInputRef}
                   id="phone"
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
                   required
-                  value={formatPhoneForDisplay(phone)}
+                  value={displayPhone}
                   onChange={handlePhoneChange}
                   onBlur={() => {
                     setTouched(prev => ({ ...prev, phone: true }));
