@@ -1,27 +1,29 @@
-# Dependencies
-node_modules/
-**/node_modules/
-
-# Environment
-.env
-**/.env
-
-# Build outputs
-dist/
-build/
-**/dist/
-
 # Logs
+logs/
 *.log
 npm-debug.log*
 
-# Uploads
-uploads/
+# Dependencies
+node_modules/
 
-# IDE
+# Production builds
+dist/
+dist-ssr/
+
+# Local env files
+.env
+.env.production
+.env.local
+.env.*.local
+
+# Media/Uploads
+uploads/
+uploads
+
+# Editor directories and files
 .vscode/
 .idea/
-
-# OS
 .DS_Store
-Thumbs.db
+*.suo
+*.sln
+*.sw?

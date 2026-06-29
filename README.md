@@ -1,96 +1,244 @@
-<<<<<<< HEAD
-# Glory Simon Interiors Site Visit Booking System
+# Glory Simon Interiors — Site Visit Booking System
 
-A professional, business-oriented **Site Visit Booking & Scheduling CRM** built for Glory Simon Interiors. Drawing design inspiration from professional tools like Linear and Notion, it delivers a clean, high-end, premium SaaS user experience in a strict **Light Theme** (white, slate, and gold accents).
-
----
-
-## 🌟 Key Features
-
-1. **Luxury Landing Page**: Incorporates 6 structured sections (Hero, How It Works, Services, Statistics, Testimonials, and Book Site Visit CTA) showcasing living room designs with custom gold branding.
-2. **Smart Auto-Assignment Engine**: Intelligent matching of designers and site engineers to incoming bookings based on location proximity, workload bounds, and calendar conflicts. Staff marked as `Busy` or `On Leave` are automatically skipped.
-3. **Calendar Scheduling Conflict Prevention**:
-   - The engine automatically skips scheduling a professional if they have a scheduled visit at the same date and slot.
-   - Manual override options validate availability on the backend, preventing double bookings on the same date/slot.
-4. **Client Portal Dashboard**:
-   - **My Bookings View**: Lists the client's site visits in a modern card grid, featuring Booking IDs (`GSI-YYYY-XXXX`), preferred slots, address coordinates, and status badges.
-   - **Progress Stepper & Timeline**: Active tracking stepper along with a detailed vertical activity log showing booking creation, recommendations, and status updates.
-   - **AI Visit Reports**: Displays structured summaries, recommendations, and follow-up actions once visits are completed.
-5. **Admin CRM Overview**:
-   - **5 KPI Metric Cards**: Shows Total Bookings, Today's Visits, Pending Visits, Completed Visits, and Cancelled Visits.
-   - **Dashboard Quick Actions**: Clean actions tray for **New Booking**, **Assign Professional**, **Export CSV**, and **Download Reports**.
-   - **Calendar View**: Displays visits labeled with unique Booking IDs.
-   - **Staff Availability Manager**: Allows toggling status (`Available`, `Busy`, `On Leave`) to update the assignment engine dynamically.
-6. **Command Search Palette (`Ctrl+K`)**: Openable via shortcut or navbar click to search clients or look up platform sections instantly.
+A full-stack, production-ready **Site Visit Booking System** for Glory Simon Interiors — an interior design company. Built with React (Vite), Node.js/Express, MySQL, and Firebase.
 
 ---
 
-## 🛠️ Tech Stack & Directory Structure
-
-- **Frontend**: React, Vite, Tailwind CSS (v3), React Router DOM, Recharts, Lucide-React, Axios.
-- **Backend**: Node.js, Express.js.
-- **Database**: MySQL (configured via `database/database.sql` migrations).
+## 🏗️ Project Structure
 
 ```
-internship-1/
-├── package.json                   # Root package manager
-├── README.md                      # Setup and execution guide
-├── backend/                       # Express.js REST API
-│   ├── package.json
-│   ├── server.js                  # API Entry
-│   ├── db.js                      # Database configurations (MySQL only with connection pooling)
-│   ├── seed.js                    # Seeding engine (50 clients, 15 designers, 10 engineers, etc.)
-│   └── database/
-│       └── database.sql           # MySQL database schema migrations script
-└── frontend/                      # React Vite Client
-    ├── package.json
-    ├── vite.config.js
-    └── src/
-        ├── App.jsx                # Layouts & routing
-        ├── index.css              # Custom light theme styles
-        ├── context/
-        │   └── AppContext.jsx     # Auth state, commands, notifications context
-        ├── components/            # Reusable UI components (Calendar, Palette, Notification)
-        └── pages/                 # Landing Page, Client Portal, CRM, Booking Form
+glory-simon-booking/
+├── backend/               # Node.js + Express REST API
+│   ├── src/
+│   │   ├── config/        # MySQL pool, Firebase init
+│   │   ├── controllers/   # Business logic (9 controllers)
+│   │   ├── middleware/    # JWT auth, RBAC, validation
+│   │   ├── routes/        # API route definitions (9 route files)
+│   │   ├── services/      # Email, WhatsApp, Firebase, AI
+│   │   ├── utils/         # JWT, bcrypt, PDF generator, priority engine
+│   │   └── app.js         # Express entry point
+│   ├── scripts/
+│   │   ├── initDb.js      # Create database + run schema
+│   │   └── seed.js        # Populate with sample data
+│   ├── database.sql       # Full MySQL schema (16 tables)
+│   └── .env.example       # Environment variables template
+├── frontend/              # React + Vite SPA
+│   ├── src/
+│   │   ├── assets/        # Global CSS design system
+│   │   ├── components/    # Reusable UI components
+│   │   ├── context/       # Auth + Notification contexts
+│   │   ├── layouts/       # Role-specific layouts
+│   │   ├── pages/         # All page components
+│   │   └── services/      # API client (fetch wrapper)
+│   └── index.html
+├── run.bat                # Start both servers (Windows)
+└── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
+## ⚡ Quick Start
 
-To run the application locally, follow these 3 steps:
+### Prerequisites
+- Node.js >= 18.0.0
+- MySQL 8.0+
+- npm >= 9.0.0
 
-### 1. Install Dependencies
-Run the installation script in the root directory to set up both the backend and frontend modules:
+### 1. Clone / Navigate to Project
 ```bash
-npm run install-all
+cd "glory-simon-booking"
 ```
 
-### 2. Seed the Database
-Populate the database with the pre-configured dataset (50 Clients, 15 Designers, 10 Engineers, and 100 Bookings):
+### 2. Setup MySQL Database
 ```bash
+# Create database and run schema
+mysql -u root -p < backend/database.sql
+```
+Or use the init script:
+```bash
+cd backend
+cp .env.example .env
+# Fill in DB_PASSWORD in .env
+npm install
+npm run db:init
+```
+
+### 3. Configure Environment
+```bash
+cd backend
+cp .env.example .env
+```
+Edit `.env` with your MySQL credentials and SMTP settings.
+
+### 4. Seed Sample Data
+```bash
+cd backend
 npm run seed
 ```
+This creates: 1 Admin, 3 Designers, 3 Site Engineers, 10 Clients, 60 days of slots, 20 bookings.
 
-### 3. Run the Servers Concurrently
-Start both the Vite development server and the Express API server concurrently:
+### 5. Start Backend
 ```bash
+cd backend
 npm run dev
+# API running at http://localhost:5000
 ```
-- The React frontend will be accessible at: **[http://localhost:3000](http://localhost:3000)**
-- The Express API backend runs at: **[http://localhost:5000](http://localhost:5000)**
+
+### 6. Start Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+# App running at http://localhost:5173
+```
+
+### 7. Or run both at once (Windows)
+```
+Double-click run.bat
+```
 
 ---
 
-## 🔑 Test Credentials
-Click **Portal Login** on the landing page navbar and use the quick pre-fill buttons or log in manually with:
+## 🔑 Default Login Credentials
 
-* **Admin CEO Role**:
-  - Email: `ceo@glorysimon.com`
-  - Password: `admin123`
-* **Client Role**:
-  - Email: (Click any client button or use a seeded email, e.g. `amit.sharma1@example.com`)
-  - Password: `client123`
-=======
-# symon-glory-interiors
->>>>>>> 9438c9b9663c08cd5a338110cb7e9e2f37391f41
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@glorysimon.com | Admin@Glory123 |
+| **Designer** | priya.design@glorysimon.com | Glory@123 |
+| **Designer** | karthik.design@glorysimon.com | Glory@123 |
+| **Designer** | sneha.design@glorysimon.com | Glory@123 |
+| **Site Engineer** | raj.engineer@glorysimon.com | Glory@123 |
+| **Site Engineer** | anand.engineer@glorysimon.com | Glory@123 |
+| **Site Engineer** | divya.engineer@glorysimon.com | Glory@123 |
+| **Client** | client01@gmail.com | Client@123 |
+| **Client** | client02@gmail.com | Client@123 |
+| *(10 clients total)* | client01–10@gmail.com | Client@123 |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, React Router v6, Vite 5 |
+| Styling | Vanilla CSS (luxury HSL theme, glassmorphism) |
+| Backend | Node.js 18+, Express 4 |
+| Database | MySQL 8.0 (mysql2, raw SQL, no ORM) |
+| Auth | JWT (24hr expiry), bcrypt (10 rounds) |
+| Email | Nodemailer (SMTP) |
+| WhatsApp | Template-based (stored in DB, Twilio-ready) |
+| Firebase | Firebase Admin SDK (Cloud Messaging) |
+| PDF | PDFKit |
+| Testing | Jest + Supertest |
+
+---
+
+## 👥 User Roles
+
+| Role | Access |
+|---|---|
+| **Admin** | Full system access, bookings management, staff assignment, calendar, reports, user management |
+| **Client** | Register, book visits, view history, track status, reschedule, cancel |
+| **Designer** | View assigned visits, submit visit reports, measurements, design suggestions |
+| **Site Engineer** | View assigned visits, submit inspection notes, measurements, photos |
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Client registration |
+| POST | `/api/auth/login` | Login (all roles) |
+| GET | `/api/auth/me` | Current user profile |
+| GET | `/api/bookings` | List bookings (Admin/Staff) |
+| POST | `/api/bookings` | Create booking (Client) |
+| GET | `/api/bookings/my` | Client's own bookings |
+| PATCH | `/api/bookings/:id/status` | Update status |
+| PATCH | `/api/bookings/:id/cancel` | Cancel booking |
+| PATCH | `/api/bookings/:id/reschedule` | Reschedule booking |
+| GET | `/api/slots?date=` | Get available slots |
+| POST | `/api/slots` | Create slot (Admin) |
+| POST | `/api/assignments` | Assign staff (Admin) |
+| POST | `/api/reports` | Submit visit report |
+| GET | `/api/reports/booking/:id/export` | Export PDF |
+| GET | `/api/dashboard/admin` | Admin metrics |
+| GET | `/api/dashboard/conversion` | Conversion funnel |
+| GET | `/api/calendar?view=&date=` | Calendar data |
+| GET | `/api/notifications` | User notifications |
+| POST | `/api/ai/priority` | Detect booking priority |
+| POST | `/api/ai/summary` | Generate visit summary |
+
+---
+
+## 🗄️ Database Schema
+
+16 tables with proper FK constraints and indexes:
+
+`roles` → `users` → `clients` / `designers` / `site_engineers`
+`project_types` → `bookings` → `slots`
+`bookings` → `assignments` → `visit_reports` → `measurements` + `site_photos`
+`users` → `notifications` + `activity_logs`
+`bookings` → `followups` + `quotations`
+
+---
+
+## 🔔 Notifications
+
+| Type | Trigger | Channel |
+|------|---------|---------|
+| Booking Confirmation | On booking creation | Email + WhatsApp + In-App |
+| Booking Approval | Status → Confirmed | Email + In-App |
+| Staff Assignment | Staff assigned | Email + In-App (staff) |
+| Visit Reminder | 24hr before visit | Email + WhatsApp |
+| Completion | Status → Completed | Email + In-App |
+
+---
+
+## 🤖 AI / Rule-Based Features
+
+| Feature | Logic |
+|---------|-------|
+| Priority Detection | Budget × Property Type × Room Count → Low/Medium/High/Urgent |
+| Visit Summary | Auto-generate professional report from observations + measurements |
+| Confirmation Message | Template-based booking confirmation text |
+| Reminder Message | Visit reminder with checklist |
+| Follow-up Recommendations | Budget-tier based action items |
+
+---
+
+## 🧪 Running Tests
+
+```bash
+cd backend
+npm test
+```
+
+Test files: `tests/auth.test.js`, `tests/booking.test.js`, `tests/slot.test.js`, `tests/integration.test.js`
+
+---
+
+## 📦 Environment Variables
+
+See `backend/.env.example` for full list. Key variables:
+
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=glory_simon_booking
+JWT_SECRET=your_secret_key
+SMTP_USER=your@email.com
+SMTP_PASSWORD=your_app_password
+FIREBASE_PROJECT_ID=your-project-id
+```
+
+---
+
+## 🚀 Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment guide.
+
+---
+
+*Glory Simon Interiors — Transforming spaces, crafting experiences.*
