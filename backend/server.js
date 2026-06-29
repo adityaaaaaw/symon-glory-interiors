@@ -205,41 +205,93 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Register Client
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, phone } = req.body || {};
+
+  const normalizedName = String(name || '').trim();
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedPhone = String(phone || '').replace(/\D/g, '').slice(0, 10);
+
+  const validationErrors = [];
+
+  if (!normalizedName || normalizedName.length < 2) {
+    validationErrors.push({ field: 'name', message: 'Full name is required.' });
+  } else if (!/^[A-Za-z\s]+$/.test(normalizedName)) {
+    validationErrors.push({ field: 'name', message: 'Only letters and spaces are allowed.' });
+  }
+
+  if (!normalizedEmail) {
+    validationErrors.push({ field: 'email', message: 'Email address is required.' });
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    validationErrors.push({ field: 'email', message: 'Please enter a valid email address.' });
+  }
+
+  if (!normalizedPhone) {
+    validationErrors.push({ field: 'phone', message: 'Phone number is required.' });
+  } else if (!/^\d{10}$/.test(normalizedPhone)) {
+    validationErrors.push({ field: 'phone', message: 'Phone number must be exactly 10 digits.' });
+  }
+
+  if (!password || String(password).length < 8) {
+    validationErrors.push({ field: 'password', message: 'Password must be at least 8 characters.' });
+  } else if (String(password).length > 64) {
+    validationErrors.push({ field: 'password', message: 'Password cannot exceed 64 characters.' });
+  } else if (!/[A-Z]/.test(String(password))) {
+    validationErrors.push({ field: 'password', message: 'Password must contain at least one uppercase letter.' });
+  } else if (!/[a-z]/.test(String(password))) {
+    validationErrors.push({ field: 'password', message: 'Password must contain at least one lowercase letter.' });
+  } else if (!/\d/.test(String(password))) {
+    validationErrors.push({ field: 'password', message: 'Password must contain at least one number.' });
+  } else if (!/[@$!%*?&#]/.test(String(password))) {
+    validationErrors.push({ field: 'password', message: 'Password must contain at least one special character.' });
+  }
+
+  if (validationErrors.length > 0) {
+    const firstError = validationErrors[0];
+    return res.status(422).json({ message: firstError.message, field: firstError.field });
+  }
+
   try {
-    const existing = await query.get('SELECT id FROM users WHERE email = ?', [email]);
+    const existing = await query.get('SELECT id FROM users WHERE LOWER(email) = LOWER(?)', [normalizedEmail]);
     if (existing) {
-      return res.status(400).json({ message: 'Email is already registered.' });
+      return res.status(400).json({ message: 'Email already exists.', field: 'email' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
-    
+    const hashedPassword = await bcrypt.hash(String(password), 10);
+    const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(normalizedName)}`;
+    const userId = randomUUID();
+
     const result = await query.run(
-      'INSERT INTO users (name, email, password, role, phone, avatar) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, email, hashedPassword, 'client', phone, avatarUrl]
+      'INSERT INTO users (uuid, name, email, password, role, phone, avatar) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [userId, normalizedName, normalizedEmail, hashedPassword, 'client', normalizedPhone, avatarUrl]
     );
 
     const token = jwt.sign(
-      { id: result.id, name, email, role: 'client' },
+      { id: result.id, name: normalizedName, email: normalizedEmail, role: 'client' },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    logEvent('auth', 'New client registered', { email, userId: result.id });
+    logEvent('auth', 'New client registered', { email: normalizedEmail, userId: result.id });
 
     res.status(201).json({
       token,
       id: result.id,
-      name,
-      email,
+      name: normalizedName,
+      email: normalizedEmail,
       role: 'client',
-      phone,
+      phone: normalizedPhone,
       avatar: avatarUrl
     });
   } catch (err) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Auth register error', {
+        message: err.message,
+        stack: err.stack,
+        body: { name, email, phone }
+      });
+    }
     logEvent('error', 'Auth register error', { error: err.message });
-    res.status(500).json({ message: 'Server error.', error: err.message });
+    res.status(500).json({ message: 'Server error while creating account.', error: process.env.NODE_ENV !== 'production' ? err.message : undefined });
   }
 });
 

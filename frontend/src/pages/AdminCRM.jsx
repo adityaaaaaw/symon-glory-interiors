@@ -1035,13 +1035,43 @@ export const AdminCRM = () => {
               </a>
             </div>
 
-
-            ) : (
+            {filteredBookings.length === 0 ? (
               /* EMPTY STATE: NO MATCHING BOOKINGS */
               <div className="text-center py-16 space-y-4 border border-dashed border-borderColor rounded-2xl">
                 <AlertCircle className="w-10 h-10 text-secondary/30 mx-auto" />
                 <h3 className="font-poppins font-bold text-sm text-primary">No matching bookings</h3>
                 <p className="text-xs text-secondary max-w-xs mx-auto leading-relaxed">Adjust your search query or filters to find other site visit consultations.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-borderColor text-secondary/70 uppercase tracking-wider bg-bgBase">
+                      <th className="py-3 px-3 font-semibold">Booking ID</th>
+                      <th className="py-3 px-3 font-semibold">Client</th>
+                      <th className="py-3 px-3 font-semibold">Property</th>
+                      <th className="py-3 px-3 font-semibold">Status</th>
+                      <th className="py-3 px-3 font-semibold">Date</th>
+                      <th className="py-3 px-3 font-semibold">Assigned</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-borderColor/50">
+                    {filteredBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-bgBase/60">
+                        <td className="py-3 px-3 font-semibold text-primary">{booking.booking_id_str}</td>
+                        <td className="py-3 px-3 text-secondary">{booking.client_name}</td>
+                        <td className="py-3 px-3 text-secondary">{booking.property_type}</td>
+                        <td className="py-3 px-3">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-bgBase text-secondary">
+                            {booking.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-secondary">{booking.preferred_date}</td>
+                        <td className="py-3 px-3 text-secondary">{booking.assigned_to_role ? `${booking.assigned_to_role}` : 'Unassigned'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
 

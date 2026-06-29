@@ -114,11 +114,10 @@ export const Register = () => {
   };
 
   const handlePhoneChange = (e) => {
-    // Reject anything except digits
-    const clean = e.target.value.replace(/\D/g, '').slice(0, 10);
-    setPhone(clean);
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhone(digits);
     if (touched.phone) {
-      validateField('phone', clean);
+      validateField('phone', digits);
     }
   };
 
@@ -140,9 +139,10 @@ export const Register = () => {
 
   // Format phone number for UI display only: +91 XXXXX XXXXX
   const formatPhoneForDisplay = (raw) => {
-    if (!raw) return '';
-    if (raw.length <= 5) return `+91 ${raw}`;
-    return `+91 ${raw.slice(0, 5)} ${raw.slice(5)}`;
+    const digits = String(raw || '').replace(/\D/g, '').slice(0, 10);
+    if (!digits) return '';
+    if (digits.length > 5) return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+    return `+91 ${digits}`;
   };
 
   // Calculate live password strength
@@ -198,9 +198,10 @@ export const Register = () => {
     if (res.success) {
       navigate('/client/dashboard');
     } else {
+      setTouched(prev => ({ ...prev, name: true, email: true, phone: true, password: true }));
       setErrors(prev => ({
         ...prev,
-        email: res.message && res.message.includes('Email') ? res.message : prev.email
+        ...(res.field ? { [res.field]: res.message } : {})
       }));
       showToast(res.message || 'Registration failed. Please try again.', 'error');
     }
@@ -312,6 +313,8 @@ export const Register = () => {
                 <input
                   id="phone"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   required
                   value={formatPhoneForDisplay(phone)}
                   onChange={handlePhoneChange}

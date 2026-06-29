@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AppContext = createContext();
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 10000
@@ -116,19 +116,39 @@ export const AppProvider = ({ children }) => {
   const register = async (name, email, password, phone) => {
     setLoading(true);
     try {
-      const res = await api.post('/auth/register', { name, email, password, phone });
-      
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data));
-      
-      setUser(res.data);
-      showToast(`Account created, welcome ${name}!`, 'success');
+      const payload = {
+        name,
+        email,
+        password,
+        phone
+      };
+
+      const res = await api.post('/auth/register', payload);
+      const userData = res.data;
+
+      localStorage.setItem('token', userData.token);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      setUser(userData);
+      showToast(`Account created, welcome ${userData.name}!`, 'success');
       setCurrentTab('portal');
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
-      const errMsg = error.response?.data?.message || 'Registration failed.';
+      const status = error.response?.status;
+      const errMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Registration failed.';
+      const field = error.response?.data?.field || null;
+
+      if (import.meta.env.DEV) {
+        console.error('Registration failed', {
+          status,
+          message: errMsg,
+          response: error.response?.data,
+          error: error.message
+        });
+      }
+
       showToast(errMsg, 'error');
-      return { success: false, message: errMsg };
+      return { success: false, message: errMsg, field };
     } finally {
       setLoading(false);
     }
