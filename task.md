@@ -1,38 +1,28 @@
-# Task Checklist - Final SaaS Acceptance & Stabilization
+# Task Checklist - Mobile Responsiveness Overhaul
 
-- `[x]` **Phase 1: Zero Build Errors & Clean Startup**
-  - `[x]` Run frontend build `npm run build` and resolve any compiler/Vite errors or warnings.
-  - `[x]` Verify backend startup log output and error messages.
-- `[x]` **Phase 2: Database Integrity & Parameterized SQL**
-  - `[x]` Verify MySQL connection via environment variables.
-  - `[x]` Audit all database queries in `server.js` and `db.js` to ensure parameterized SQL is strictly used.
-  - `[x]` Verify seeding script `npm run seed` runs and drops/populates all tables successfully.
-- `[x]` **Phase 3: Authentication & Role Authorization**
-  - `[x]` Verify secure user registration and login with bcrypt password hashing.
-  - `[x]` Confirm proper JWT signing and token decryption.
-  - `[x]` Check protected route guards (`ProtectedRoute`, `AdminRoute`) and redirects.
-  - `[x]` Validate role authorization for all four roles: Admin, Client, Designer, and Site Engineer.
-- `[x]` **Phase 4: Client Workflow Verification**
-  - `[x]` Test client registration, login, site visit booking creation.
-  - `[x]` Test multi-file design reference uploads.
-  - `[x]` Verify visit timeline milestones, notifications, and quotation approval/rejection responses.
-- `[x]` **Phase 5: Admin Workflow Verification**
-  - `[x]` Test admin login, dashboard loading, and staff directory management.
-  - `[x]` Test booking management (create, edit, assign staff, cancel).
-  - `[x]` Verify Database Viewer summary metrics and searchable/sortable table interfaces.
-- `[x]` **Phase 6: Designer & Engineer Workflow**
-  - `[x]` Verify assignment acceptance states.
-  - `[x]` Test visit report submissions (measurements, material suggestions, summaries, visit image upload).
-- `[x]` **Phase 7: Live Analytics & Dashboard Charts**
-  - `[x]` Verify that all analytics KPI cards and charts (monthly revenue, property type distribution, status distributions) pull live data.
-- `[x]` **Phase 8: Visit Calendar & Drag-and-Drop Scheduling**
-  - `[x]` Verify Month/Week/Day scheduling, staff filtering, and conflict checks on the calendar.
-- `[x]` **Phase 9: UI Polish (States & Toasts)**
-  - `[x]` Verify loading indicators, skeletons, empty states, error states, and success toasts.
-- `[x]` **Phase 10: Security Enforcement**
-  - `[x]` Verify Helmet security headers, rate limiting (auth/general), and upload validation controls (file sizes/types).
-- `[x]` **Phase 11: Code Quality & Dead Code Cleanup**
-  - `[x]` Remove TODO comments, print/debugging logs, unused files, and old mock elements.
-- `[x]` **Phase 12: End-to-End Booking Lifecycle Final Verification**
-  - `[x]` Start both backend and frontend servers.
-  - `[x]` Run complete booking lifecycle from sign-up through booking, assignment, report upload, quotation, client approval, and completion.
+- `[x]` **Phase 1: Global Navigation & Hero Section Overhaul**
+  - `[x]` Implement mobile hamburger menu and sliding drawer in `LandingPage.jsx`
+  - `[x]` Refactor portal header layout in `App.jsx` to prevent overflow on small screens
+  - `[x]` Update text scaling and vertical buttons stack in `HeroSection.jsx`
+- `[x]` **Phase 2: Authentication Screens Padding & Autofill**
+  - `[x]` Adjust page margins/paddings in `Register.jsx`, `Login.jsx`, `ForgotPassword.jsx`, `AdminLogin.jsx`
+  - `[x]` Align inputs and buttons to ensure touch-friendly heights (>=48px) and autofill headers
+- `[x]` **Phase 3: Booking & Professional Forms**
+  - `[x]` Refactor layout grid, property selector chips, and address card in `BookingForm.jsx`
+  - `[x]` Adjust availability headers and report upload forms for professionals
+- `[x]` **Phase 4: Client Dashboard Stepper & Quotation Cards**
+  - `[x]` Add mobile card-based quotation view (`block md:hidden`) in `ClientDashboard.jsx`
+  - `[x]` Optimize timeline stepper spacing and font sizes for narrow screens
+- `[x]` **Phase 5: Admin CRM Sidebar Drawer**
+  - `[x]` Add mobile hamburger header and animated sidebar drawer in `AdminCRM.jsx`
+  - `[x]` Adjust database summary KPI cards to wrap correctly
+- `[/]` **Phase 6: Admin CRM Tables & Spreadsheet**
+  - `[ ]` Implement mobile-card layouts for all tabular data screens (Bookings, Staff, Reports, DB Viewer)
+  - `[ ]` Redesign estimate spreadsheet into touch-friendly mobile panels in the Quotation Creator
+  - `[ ]` Ensure charts and graph containers resize dynamically
+- `[ ]` **Phase 7: Interactive Calendar**
+  - `[ ]` Abbreviate day headers and scale day grid cells in `InteractiveCalendar.jsx`
+  - `[ ]` Stack agenda panel cleanly below calendar grid on mobile
+- `[ ]` **Phase 8: Viewport Audit & Build Verification**
+  - `[ ]` Inspect layout at 320px, 360px, 375px, 390px, 414px, 430px, 768px, 1024px, 1440px
+  - `[ ]` Build frontend cleanly using `npm run build`

@@ -175,10 +175,10 @@ export const BookingForm = () => {
   // BOOKING REQUEST FORM
   // ------------------------------------
   return (
-    <div className="max-w-4xl mx-auto py-16 px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="w-full max-w-6xl mx-auto py-8 sm:py-12 lg:py-16 px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.8fr)] gap-6 lg:gap-8">
       
       {/* Form Area */}
-      <div className="lg:col-span-2 bg-white border border-borderColor rounded-2xl p-6 md:p-8 shadow-premium space-y-6">
+      <div className="bg-white border border-borderColor rounded-2xl p-5 sm:p-6 md:p-8 shadow-premium space-y-6">
         <div className="border-b border-borderColor pb-4">
           <h2 className="font-poppins text-xl font-bold text-primary">
             Request Site Consultation Visit
@@ -197,7 +197,7 @@ export const BookingForm = () => {
               <input
                 type="text"
                 required
-                className="w-full px-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
+                className="w-full px-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -208,7 +208,7 @@ export const BookingForm = () => {
               <input
                 type="text"
                 required
-                className="w-full px-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
+                className="w-full px-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
                 placeholder="+91 99000 88888"
                 value={formData.phone}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
@@ -219,7 +219,7 @@ export const BookingForm = () => {
               <input
                 type="email"
                 required
-                className="w-full px-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
+                className="w-full px-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -257,7 +257,7 @@ export const BookingForm = () => {
                 <input
                   type="date"
                   required
-                  className="w-full pl-9 pr-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
+                  className="w-full pl-9 pr-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
                   value={formData.preferred_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, preferred_date: e.target.value }))}
                 />
@@ -269,7 +269,7 @@ export const BookingForm = () => {
               <div className="relative">
                 <Clock className="absolute left-3 top-3 w-4 h-4 text-accentGold" />
                 <select
-                  className="w-full pl-9 pr-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
+                  className="w-full pl-9 pr-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none focus:border-accentGold"
                   value={formData.preferred_slot}
                   onChange={(e) => setFormData(prev => ({ ...prev, preferred_slot: e.target.value }))}
                 >
@@ -288,7 +288,7 @@ export const BookingForm = () => {
                 <textarea
                   required
                   rows="3"
-                  className="w-full pl-9 pr-4 py-2.5 bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none resize-none placeholder-secondary focus:border-accentGold"
+                  className="w-full pl-9 pr-4 py-3 min-h-[48px] bg-bgBase text-xs text-primary border border-borderColor rounded-xl outline-none resize-none placeholder-secondary focus:border-accentGold"
                   placeholder="Enter full address, sector, landmark details..."
                   value={formData.address}
                   onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
@@ -312,7 +312,7 @@ export const BookingForm = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3.5 bg-accentGold text-white hover:bg-accentGold/90 text-xs font-bold rounded-xl shadow-lg transition-colors uppercase tracking-wider"
+            className="w-full py-3.5 min-h-[48px] bg-accentGold text-white hover:bg-accentGold/90 text-xs font-bold rounded-xl shadow-lg transition-colors uppercase tracking-wider flex items-center justify-center"
           >
             {isSubmitting ? 'Checking availabilities...' : 'Schedule site visit consultation'}
           </button>
@@ -320,7 +320,7 @@ export const BookingForm = () => {
       </div>
 
       {/* Utilization & Helper Sidebar */}
-      <div className="space-y-6">
+      <div className="space-y-6 w-full">
         <div className="bg-white border border-borderColor rounded-2xl p-6 shadow-premium space-y-4">
           <h3 className="font-poppins text-sm font-semibold text-primary border-b border-borderColor pb-2">
             Why Auto-Assignment?

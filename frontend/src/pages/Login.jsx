@@ -32,13 +32,13 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
       
       {/* Decorative luxury elements */}
       <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-[#C5A880]/5 blur-[120px]" />
       <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#1C1C1C]/5 blur-[120px]" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10 text-center">
+      <div className="w-full max-w-md mx-auto z-10 text-center">
         <Link to="/" className="inline-flex items-center justify-center gap-2 mb-6">
           <div className="w-10 h-10 rounded-xl bg-[#1C1C1C] flex items-center justify-center font-bold text-[#C5A880] text-xl shadow-md">G</div>
           <span className="font-extrabold text-[#1C1C1C] tracking-tight text-xl">
@@ -56,8 +56,8 @@ export const Login = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10 border border-[#C5A880]/10">
+      <div className="mt-8 w-full max-w-md mx-auto z-10">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8 shadow-xl rounded-2xl border border-[#C5A880]/10">
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
               {error}
@@ -79,6 +79,7 @@ export const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username email"
                   className="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A880]/40 focus:border-[#C5A880] text-sm transition-all bg-slate-50/30"
                   placeholder="name@example.com"
                 />
@@ -106,6 +107,7 @@ export const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   className="block w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A880]/40 focus:border-[#C5A880] text-sm transition-all bg-slate-50/30"
                   placeholder="••••••••"
                 />
@@ -116,7 +118,7 @@ export const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C1C] hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 transition-all disabled:opacity-50"
+                className="w-full min-h-[48px] flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C1C] hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 transition-all disabled:opacity-50"
               >
                 {loading ? 'Signing In...' : 'Sign In'}
                 {!loading && <ArrowRight className="w-4 h-4 text-[#C5A880]" />}

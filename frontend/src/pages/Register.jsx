@@ -208,13 +208,13 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF6F0] flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden">
       
       {/* Decorative luxury elements */}
       <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-[#C5A880]/5 blur-[120px]" />
       <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#1C1C1C]/5 blur-[120px]" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10 text-center">
+      <div className="w-full max-w-md mx-auto z-10 text-center">
         <Link to="/" className="inline-flex items-center justify-center gap-2 mb-6">
           <div className="w-10 h-10 rounded-xl bg-[#1C1C1C] flex items-center justify-center font-bold text-[#C5A880] text-xl shadow-md">G</div>
           <span className="font-extrabold text-[#1C1C1C] tracking-tight text-xl">
@@ -232,8 +232,8 @@ export const Register = () => {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10 border border-[#C5A880]/10">
+      <div className="mt-8 w-full max-w-md mx-auto z-10">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-6 lg:px-8 shadow-xl rounded-2xl border border-[#C5A880]/10">
 
           <form className="space-y-5" onSubmit={handleSubmit} noValidate>
             
@@ -253,9 +253,10 @@ export const Register = () => {
                   value={name}
                   onChange={handleNameChange}
                   onBlur={handleNameBlur}
+                  autoComplete="name"
                   aria-invalid={touched.name && errors.name ? "true" : "false"}
                   aria-describedby={touched.name && errors.name ? "name-error" : undefined}
-                  className={getInputClassName('name')}
+                  className={`${getInputClassName('name')} min-h-[48px]`}
                   placeholder="John Doe"
                 />
               </div>
@@ -285,9 +286,10 @@ export const Register = () => {
                     setTouched(prev => ({ ...prev, email: true }));
                     validateField('email', email);
                   }}
+                  autoComplete="email"
                   aria-invalid={touched.email && errors.email ? "true" : "false"}
                   aria-describedby={touched.email ? "email-helper" : undefined}
-                  className={getInputClassName('email')}
+                  className={`${getInputClassName('email')} min-h-[48px]`}
                   placeholder="john@example.com"
                 />
               </div>
@@ -317,9 +319,10 @@ export const Register = () => {
                     setTouched(prev => ({ ...prev, phone: true }));
                     validateField('phone', phone);
                   }}
+                  autoComplete="tel"
                   aria-invalid={touched.phone && errors.phone ? "true" : "false"}
                   aria-describedby={touched.phone && errors.phone ? "phone-error" : undefined}
-                  className={getInputClassName('phone')}
+                  className={`${getInputClassName('phone')} min-h-[48px]`}
                   placeholder="+91 98765 43210"
                 />
               </div>
@@ -350,9 +353,10 @@ export const Register = () => {
                     setTouched(prev => ({ ...prev, password: true }));
                     validateField('password', password);
                   }}
+                  autoComplete="new-password"
                   aria-invalid={touched.password && errors.password ? "true" : "false"}
                   aria-describedby={touched.password && errors.password ? "password-error" : undefined}
-                  className={getInputClassName('password')}
+                  className={`${getInputClassName('password')} min-h-[48px]`}
                   placeholder="••••••••"
                 />
                 
@@ -416,7 +420,7 @@ export const Register = () => {
               <button
                 type="submit"
                 disabled={loading || submitting || !isFormValid}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C1C] hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full min-h-[48px] flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold uppercase tracking-wider text-white bg-[#1C1C1C] hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loading || submitting ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

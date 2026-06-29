@@ -12,7 +12,8 @@ import {
   Star, 
   Calendar, 
   UserCheck, 
-  FileText
+  FileText,
+  Menu
 } from 'lucide-react';
 import { HeroSection } from '../components/HeroSection';
 
@@ -22,6 +23,7 @@ export const LandingPage = () => {
   
   // Scroll detection for Navbar transparency transitions
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -101,10 +103,10 @@ export const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#1C1C1C] transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#1C1C1C] transition-colors duration-200 overflow-x-hidden">
       
       {/* 1. Transparent Navigation header overlay */}
-      <nav className={`fixed top-0 left-0 right-0 z-40 px-6 py-4 flex items-center justify-between transition-all duration-300 ${
+      <nav className={`fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between transition-all duration-300 ${
         isScrolled 
           ? 'bg-[#FAF6F0]/95 backdrop-blur-md border-b border-[#C5A880]/15 shadow-sm' 
           : 'bg-transparent border-b border-transparent'
@@ -116,7 +118,17 @@ export const LandingPage = () => {
           </span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        {/* Mobile menu toggle */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 rounded-xl border border-slate-300/40 text-slate-800 bg-[#FAF6F0]/80 backdrop-blur-sm shadow-sm active:scale-95 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Toggle navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-4">
           <Link 
             to="/login"
             className="px-4 py-2 text-xs font-bold border border-slate-300/40 text-slate-800 rounded-xl hover:bg-slate-900/5 transition-all font-poppins uppercase tracking-wider"
@@ -132,12 +144,56 @@ export const LandingPage = () => {
         </div>
       </nav>
 
+      {/* Mobile Drawer Backdrop */}
+      {isMenuOpen && (
+        <div 
+          onClick={() => setIsMenuOpen(false)}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm md:hidden transition-opacity duration-300"
+        />
+      )}
+
+      {/* Mobile sliding navigation drawer */}
+      <div className={`fixed inset-y-0 right-0 z-50 w-72 bg-[#FAF6F0] border-l border-[#C5A880]/15 shadow-2xl p-6 flex flex-col gap-8 md:hidden transform transition-transform duration-300 ease-in-out ${
+        isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        <div className="flex items-center justify-between border-b border-[#C5A880]/15 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#1C1C1C] flex items-center justify-center font-bold text-[#C5A880] text-base">G</div>
+            <span className="font-poppins font-extrabold text-[#1C1C1C] text-sm">Glory Simon Studio</span>
+          </div>
+          <button 
+            onClick={() => setIsMenuOpen(false)}
+            className="p-2 rounded-xl hover:bg-slate-900/5 transition-all text-[#1C1C1C] min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <nav className="flex flex-col gap-4 font-poppins">
+          <Link 
+            to="/login"
+            onClick={() => setIsMenuOpen(false)}
+            className="w-full py-3.5 px-4 text-center font-bold text-sm border border-[#1C1C1C]/10 text-slate-800 rounded-xl hover:bg-slate-900/5 transition-all uppercase tracking-wider min-h-[48px] flex items-center justify-center"
+          >
+            Portal Login
+          </Link>
+          <Link 
+            to="/booking"
+            onClick={() => setIsMenuOpen(false)}
+            className="w-full py-3.5 px-4 text-center font-bold text-sm bg-[#1C1C1C] hover:bg-neutral-800 text-white rounded-xl transition-all uppercase tracking-wider min-h-[48px] flex items-center justify-center shadow-md"
+          >
+            Book Site Visit
+          </Link>
+        </nav>
+      </div>
+
       {/* 2. Hero Section (full-bleed photo with ivory overlay) */}
       <HeroSection />
 
       {/* 3. How It Works (Timeline Roadmap) */}
-      <section className="py-24 px-6 bg-[#FAF6F0] w-full border-t border-[#C5A880]/10">
-        <div className="max-w-6xl mx-auto space-y-16">
+      <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[#FAF6F0] w-full border-t border-[#C5A880]/10">
+        <div className="max-w-6xl mx-auto space-y-10 sm:space-y-14">
           <div className="text-center space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C5A880] block font-poppins">
               The Protocol
@@ -145,7 +201,7 @@ export const LandingPage = () => {
             <h2 className="font-poppins text-3xl font-extrabold text-[#1C1C1C] tracking-tight">How It Works</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
             {steps.map((s, idx) => {
               const Icon = s.icon;
               return (
@@ -163,8 +219,8 @@ export const LandingPage = () => {
       </section>
 
       {/* 4. Services Portfolio */}
-      <section className="py-24 px-6 bg-gradient-to-b from-[#FAF6F0] via-white/20 to-[#FAF6F0] border-y border-[#C5A880]/10 w-full">
-        <div className="max-w-6xl mx-auto space-y-16">
+      <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#FAF6F0] via-white/20 to-[#FAF6F0] border-y border-[#C5A880]/10 w-full">
+        <div className="max-w-6xl mx-auto space-y-10 sm:space-y-14">
           <div className="text-center space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C5A880] block font-poppins">
               Our Expertise
@@ -172,11 +228,11 @@ export const LandingPage = () => {
             <h2 className="font-poppins text-3xl font-extrabold text-[#1C1C1C] tracking-tight">Turnkey Design Services</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
             {services.map((serv, index) => (
               <div 
                 key={index}
-                className="group relative flex flex-col justify-end h-[400px] rounded-3xl overflow-hidden shadow-sm border border-[#C5A880]/10"
+                className="group relative flex flex-col justify-end h-[300px] sm:h-[340px] lg:h-[400px] rounded-3xl overflow-hidden shadow-sm border border-[#C5A880]/10"
               >
                 {/* Visual portfolio image */}
                 <img 
@@ -205,8 +261,8 @@ export const LandingPage = () => {
       </section>
 
       {/* 7. Client Testimonials */}
-      <section className="py-24 px-6 bg-gradient-to-b from-[#FAF6F0] via-white/30 to-[#FAF6F0] border-t border-[#C5A880]/10 w-full">
-        <div className="max-w-6xl mx-auto space-y-16">
+      <section className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#FAF6F0] via-white/30 to-[#FAF6F0] border-t border-[#C5A880]/10 w-full">
+        <div className="max-w-6xl mx-auto space-y-10 sm:space-y-14">
           <div className="text-center space-y-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C5A880] block font-poppins">
               Testimonials
@@ -214,11 +270,11 @@ export const LandingPage = () => {
             <h2 className="font-poppins text-3xl font-extrabold text-[#1C1C1C] tracking-tight">Client Perspectives</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
             {testimonials.map((test, index) => (
               <div 
                 key={index}
-                className="space-y-6 text-left border-l-2 border-[#C5A880]/20 pl-6 flex flex-col justify-between"
+                className="space-y-4 text-left border-l-0 md:border-l-2 border-[#C5A880]/20 pl-0 md:pl-6 flex flex-col justify-between"
               >
                 <p className="text-sm md:text-base text-[#4C4C4C] leading-relaxed italic font-light font-inter">
                   "{test.quote}"
@@ -243,10 +299,10 @@ export const LandingPage = () => {
       </section>
 
       {/* 8. Full-Width Final CTA */}
-      <section className="w-full bg-[#1C1C1C] text-white py-28 px-6 relative overflow-hidden text-center">
+      <section className="w-full bg-[#1C1C1C] text-white py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden text-center">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#C5A880]/5 rounded-full blur-3xl pointer-events-none"></div>
         
-        <div className="max-w-2xl mx-auto space-y-8 relative z-10">
+        <div className="max-w-2xl mx-auto space-y-6 sm:space-y-8 relative z-10">
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C5A880] block font-poppins">
             Studio Booking
           </span>
@@ -269,15 +325,43 @@ export const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 text-slate-500 text-xs py-8 border-t border-slate-900 text-center w-full">
-        <div className="max-w-6xl mx-auto px-6 space-y-4">
-          <div className="flex items-center justify-center gap-2.5">
-            <div className="w-6 h-6 rounded bg-[#FAF6F0] flex items-center justify-center font-bold text-primary text-xs text-[#C5A880]">G</div>
-            <span className="font-poppins font-bold text-white tracking-tight">Glory Simon Interiors</span>
+      <footer className="bg-slate-950 text-slate-400 text-xs py-16 border-t border-slate-900 w-full text-left font-poppins">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+          {/* Brand Column */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded bg-[#FAF6F0] flex items-center justify-center font-bold text-primary text-sm text-[#C5A880]">G</div>
+              <span className="font-bold text-white tracking-tight text-base">Glory Simon Interiors</span>
+            </div>
+            <p className="text-slate-500 text-[11px] leading-relaxed font-light font-inter">
+              Premium Interior Site Visit Booking & Project Management Platform for Glory Simon Interiors.
+            </p>
+            <p className="text-[10px] text-slate-650 font-light font-inter">
+              &copy; {new Date().getFullYear()} Glory Simon Interiors. All rights reserved.
+            </p>
           </div>
-          <p className="text-[10px] text-slate-650">
-            &copy; {new Date().getFullYear()} Glory Simon Interiors. All rights reserved. Turnkey scheduling modules.
-          </p>
+
+          {/* Links Column */}
+          <div className="space-y-3">
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider text-accentGold font-poppins">Quick Links</h4>
+            <div className="flex flex-col gap-2 text-[11px] font-medium font-inter">
+              <Link to="/login" className="hover:text-white transition-colors">Client Portal Login</Link>
+              <Link to="/register" className="hover:text-white transition-colors">Create Client Account</Link>
+              <Link to="/booking" className="hover:text-white transition-colors">Book Site Visit</Link>
+              <Link to="/admin/login" className="hover:text-white transition-colors">Staff CRM Portal</Link>
+            </div>
+          </div>
+
+          {/* Info Column */}
+          <div className="space-y-3">
+            <h4 className="text-white font-bold text-xs uppercase tracking-wider text-accentGold font-poppins">Contact & Hours</h4>
+            <div className="space-y-2 text-[11px] text-slate-400 font-light font-inter leading-relaxed">
+              <p>Email: contact@glorysimoninteriors.com</p>
+              <p>Phone: +91 98765 43210</p>
+              <p>Address: 12, Lavelle Road, Bangalore, KA - 560001</p>
+              <p className="text-slate-500 font-medium">Mon - Sat: 9:00 AM - 6:00 PM</p>
+            </div>
+          </div>
         </div>
       </footer>
 

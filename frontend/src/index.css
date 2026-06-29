@@ -4,14 +4,21 @@
 
 @layer base {
   html {
+    @apply overflow-x-hidden;
     /* scroll-behavior: smooth is disabled to prevent conflicts with Lenis & ScrollTrigger */
   }
   
   body {
-    @apply font-inter bg-bgBase text-primary;
+    @apply min-h-screen overflow-x-hidden font-inter bg-bgBase text-primary;
   }
 
+  #root {
+    @apply min-h-screen;
+  }
 
+  img {
+    @apply block max-w-full;
+  }
 
   /* Custom subtle scrollbar */
   ::-webkit-scrollbar {

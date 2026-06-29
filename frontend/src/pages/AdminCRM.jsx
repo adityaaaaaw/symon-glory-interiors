@@ -42,7 +42,9 @@ import {
   Eye,
   CheckSquare,
   Square,
-  FilePlus
+  FilePlus,
+  Menu,
+  X
 } from 'lucide-react';
 
 export const AdminCRM = () => {
@@ -62,6 +64,7 @@ export const AdminCRM = () => {
   } = useApp();
 
   const [crmTab, setCrmTab] = useState('dashboard'); // 'dashboard', 'bookings', 'calendar', 'reports', 'settings', 'diagnostics', 'database_viewer', 'quotation_creator'
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Booking detail / CRM interaction states
   const [detailBookingOpen, setDetailBookingOpen] = useState(false);
@@ -646,24 +649,64 @@ export const AdminCRM = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-bgBase text-primary animate-fadeIn w-full">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-bgBase text-primary animate-fadeIn w-full relative overflow-x-hidden">
       
-      {/* Sidebar navigation */}
-      <aside className="w-full lg:w-64 bg-white border-r border-borderColor p-6 flex flex-col gap-6 shrink-0 shadow-sm">
-        <div className="flex items-center gap-3 border-b border-borderColor pb-5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-slate-800 flex items-center justify-center font-bold text-accentGold text-base shadow-md">
+      {/* Mobile Header Toggle Bar */}
+      <div className="flex lg:hidden items-center justify-between p-4 bg-white border-b border-borderColor sticky top-0 z-30 w-full shrink-0 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-slate-800 flex items-center justify-center font-bold text-accentGold text-sm shadow-sm">
             GS
           </div>
           <div>
-            <h3 className="font-poppins font-bold text-primary text-sm tracking-tight">Glory Simon</h3>
-            <span className="text-[10px] text-accentGold uppercase font-bold tracking-widest block -mt-0.5">Scheduling CRM</span>
+            <h3 className="font-poppins font-bold text-primary text-xs tracking-tight">Glory Simon</h3>
+            <span className="text-[9px] text-accentGold uppercase font-bold tracking-widest block -mt-0.5">Scheduling CRM</span>
           </div>
+        </div>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-xl border border-borderColor text-secondary hover:text-accentGold active:scale-95 transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
+          aria-label="Toggle CRM navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Mobile Drawer Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+        />
+      )}
+
+      {/* Sidebar navigation (Drawer on mobile, permanent on desktop) */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-borderColor p-6 flex flex-col gap-6 shrink-0 shadow-xl lg:shadow-sm transform lg:transform-none transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="flex items-center justify-between border-b border-borderColor pb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-slate-800 flex items-center justify-center font-bold text-accentGold text-base shadow-md">
+              GS
+            </div>
+            <div>
+              <h3 className="font-poppins font-bold text-primary text-sm tracking-tight">Glory Simon</h3>
+              <span className="text-[10px] text-accentGold uppercase font-bold tracking-widest block -mt-0.5">Scheduling CRM</span>
+            </div>
+          </div>
+          {/* Mobile close button */}
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden p-2 rounded-xl hover:bg-slate-900/5 transition-all text-[#1C1C1C] min-w-[40px] min-h-[40px] flex items-center justify-center"
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <nav className="flex-1 flex flex-col gap-1.5 text-xs font-semibold">
           <button
-            onClick={() => setCrmTab('dashboard')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('dashboard'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'dashboard' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -673,8 +716,8 @@ export const AdminCRM = () => {
           </button>
           
           <button
-            onClick={() => setCrmTab('bookings')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('bookings'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'bookings' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -684,8 +727,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('calendar')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('calendar'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'calendar' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -695,8 +738,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('reports')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('reports'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'reports' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -706,8 +749,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('settings')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('settings'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'settings' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -717,8 +760,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('quotation_creator')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('quotation_creator'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'quotation_creator' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -728,8 +771,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('diagnostics')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('diagnostics'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'diagnostics' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -739,8 +782,8 @@ export const AdminCRM = () => {
           </button>
 
           <button
-            onClick={() => setCrmTab('database_viewer')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 ${
+            onClick={() => { setCrmTab('database_viewer'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-left transition-all duration-200 min-h-[44px] ${
               crmTab === 'database_viewer' 
                 ? 'bg-primary text-white shadow-sm font-bold' 
                 : 'text-secondary hover:bg-bgBase'
@@ -753,7 +796,7 @@ export const AdminCRM = () => {
         <div className="border-t border-borderColor pt-4">
           <button 
             onClick={logout}
-            className="w-full py-2.5 border border-borderColor hover:border-red-500 hover:text-red-500 text-xs font-bold rounded-xl transition-all duration-300 text-center bg-bgBase"
+            className="w-full py-3 border border-borderColor hover:border-red-500 hover:text-red-500 text-xs font-bold rounded-xl transition-all duration-300 text-center bg-bgBase min-h-[44px] flex items-center justify-center"
           >
             Sign Out
           </button>
@@ -761,7 +804,7 @@ export const AdminCRM = () => {
       </aside>
 
       {/* Main content body */}
-      <main className="flex-1 p-8 space-y-8 overflow-y-auto max-h-screen">
+      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 overflow-y-auto max-h-screen">
         
         {/* Internship Review Verification Banner */}
         <div className="bg-[#FAF6F0] border border-[#C5A880]/30 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -845,7 +888,7 @@ export const AdminCRM = () => {
             </div>
 
             {/* exactly 5 KPI Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
               <div className="bg-white border border-borderColor rounded-2xl p-5 shadow-sm space-y-2 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-2 h-full bg-accentGold"></div>
                 <span className="text-[10px] text-secondary/50 font-bold uppercase tracking-wider block font-semibold">Total Bookings</span>
@@ -874,7 +917,7 @@ export const AdminCRM = () => {
             </div>
 
             {/* Graphs Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               
               {/* Line chart: booking trends */}
               <div className="bg-white border border-borderColor rounded-2xl p-6 shadow-sm space-y-4">
@@ -992,125 +1035,7 @@ export const AdminCRM = () => {
               </a>
             </div>
 
-            {/* List Table */}
-            {filteredBookings.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="border-b border-borderColor bg-bgBase/50 text-secondary font-bold">
-                      <th className="py-3 px-4">Booking ID</th>
-                      <th className="py-3 px-4">Client Name</th>
-                      <th className="py-3 px-4">Property Type</th>
-                      <th className="py-3 px-4">Schedule Date & Slot</th>
-                      <th className="py-3 px-4">Assigned Expert</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-borderColor/40">
-                    {filteredBookings.map((b) => {
-                      const assignedProf = professionals.find(p => p.id === b.assigned_to_id && p.role === b.assigned_to_role);
-                      return (
-                        <tr key={b.id} className="hover:bg-bgBase/40 transition-colors">
-                          {/* Booking ID */}
-                          <td className="py-3.5 px-4 font-mono font-bold text-accentGold text-[11px]">{b.booking_id_str || `GSI-TEMP-${b.id}`}</td>
-                          
-                          {/* Client Info */}
-                          <td className="py-3.5 px-4">
-                            <span className="block font-bold">{b.client_name}</span>
-                            <span className="text-[10px] text-secondary">{b.phone}</span>
-                          </td>
-                          
-                          {/* Property Type */}
-                          <td className="py-3.5 px-4 font-semibold">{b.property_type}</td>
-                          
-                          {/* Schedule Date & Slot */}
-                          <td className="py-3.5 px-4">
-                            <span className="block font-medium">{b.preferred_date}</span>
-                            <span className="text-[10px] text-secondary">{b.preferred_slot}</span>
-                          </td>
-                          
-                          {/* Assigned Professional */}
-                          <td className="py-3.5 px-4">
-                            {assignedProf ? (
-                              <div>
-                                <span className="block font-bold">{assignedProf.name}</span>
-                                <span className="text-[10px] text-secondary font-medium uppercase tracking-wider bg-bgBase px-1.5 py-0.5 rounded border border-borderColor/40">
-                                  {assignedProf.role === 'designer' ? 'Designer' : 'Engineer'}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-[10px] text-amber-500 font-bold bg-amber-500/10 px-2 py-0.5 rounded">Unassigned</span>
-                            )}
-                          </td>
-                          
-                          {/* Status */}
-                          <td className="py-3.5 px-4">
-                            <span className={`px-2.5 py-0.5 rounded-full font-semibold text-[10px] ${
-                              b.status === 'Visit Completed'
-                                ? 'bg-green-100 text-green-700'
-                                : b.status === 'Cancelled'
-                                ? 'bg-red-100 text-red-700'
-                                : b.status === 'Pending'
-                                ? 'bg-amber-100 text-amber-700'
-                                : 'bg-blue-100 text-blue-700'
-                            }`}>
-                              {b.status}
-                            </span>
-                          </td>
-                          
-                          {/* Actions */}
-                          <td className="py-3.5 px-4">
-                            <div className="flex items-center justify-center gap-1.5">
-                              {/* Assign Override Button */}
-                              <button
-                                onClick={() => openAssignmentModal(b)}
-                                className="px-2 py-1 bg-bgBase border border-borderColor hover:border-accentGold hover:text-accentGold text-[10px] font-bold rounded"
-                                title="Manage Assignment overrides"
-                              >
-                                Assign
-                              </button>
 
-                              {/* Status Dropdowns */}
-                              <select
-                                value={b.status}
-                                onChange={(e) => handleStatusSelectChange(b, e.target.value)}
-                                className="px-1.5 py-1 bg-bgBase border border-borderColor text-[10px] rounded outline-none font-semibold"
-                              >
-                                <option value="Pending">Pending</option>
-                                <option value="Assigned">Assigned</option>
-                                <option value="Scheduled">Scheduled</option>
-                                <option value="Visit Completed">Visit Completed</option>
-                                <option value="Cancelled">Cancelled</option>
-                              </select>
-
-                              {/* View CRM Details */}
-                              <button
-                                onClick={() => handleOpenBookingDetails(b)}
-                                className="p-1 hover:bg-bgBase text-secondary hover:text-primary rounded"
-                                title="View CRM Details (Timeline, Notes, Tasks, Communications, Quotations)"
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                              </button>
-
-                              {/* View Report (if completed) */}
-                              {b.status === 'Visit Completed' && (
-                                <button
-                                  onClick={() => handleViewReport(b)}
-                                  className="p-1 hover:bg-bgBase text-accentGold hover:text-accentGold/80 rounded animate-pulse"
-                                  title="View AI inspection report"
-                                >
-                                  <FileText className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
             ) : (
               /* EMPTY STATE: NO MATCHING BOOKINGS */
               <div className="text-center py-16 space-y-4 border border-dashed border-borderColor rounded-2xl">

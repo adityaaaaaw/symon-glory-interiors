@@ -337,12 +337,12 @@ export const ClientDashboard = () => {
     };
 
     return (
-      <div className="max-w-6xl mx-auto py-8 px-6 space-y-8 animate-fadeIn font-poppins text-primary">
+      <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 animate-fadeIn font-poppins text-primary">
         
         {/* Top Profile Banner for Professional Workspace */}
-        <div className="flex flex-wrap items-center justify-between gap-6 p-6 bg-white border border-borderColor rounded-2xl shadow-sm relative overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-6 p-4 sm:p-6 bg-white border border-borderColor rounded-2xl shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accentGold/5 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="flex items-center gap-4 relative z-10">
+          <div className="flex items-center gap-3 sm:gap-4 relative z-10">
             <div className="w-16 h-16 rounded-full border-2 border-accentGold/60 bg-bgBase flex items-center justify-center font-bold font-poppins text-accentGold text-xl shadow-inner overflow-hidden">
               {profObj.avatar ? (
                 <img src={profObj.avatar} alt={profObj.name} className="w-full h-full object-cover" />
@@ -382,11 +382,43 @@ export const ClientDashboard = () => {
           </div>
         </div>
 
+        {/* Mobile Horizontal Tabs Row */}
+        <div className="flex lg:hidden overflow-x-auto gap-2 pb-3 px-1 border-b border-borderColor scrollbar-none snap-x snap-mandatory">
+          <button 
+            onClick={() => setProfActiveTab('assignments')} 
+            className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              profActiveTab === 'assignments' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+            }`}
+          >
+            My Assignments ({bookings.length})
+          </button>
+          <button 
+            onClick={() => setProfActiveTab('profile')} 
+            className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              profActiveTab === 'profile' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+            }`}
+          >
+            Profile & Stats
+          </button>
+          <button 
+            onClick={() => setProfActiveTab('notifications')} 
+            className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              profActiveTab === 'notifications' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+            }`}
+          >
+            Notifications {notifications.filter(n => !n.is_read).length > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-accentGold text-white text-[8px]">
+                {notifications.filter(n => !n.is_read).length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
           
           {/* Sidebar Navigation */}
-          <div className="space-y-4 lg:col-span-1">
+          <div className="hidden lg:block space-y-4 lg:col-span-1">
             <div className="bg-white border border-borderColor rounded-2xl p-4 space-y-1">
               <span className="text-[9px] font-bold text-secondary/50 uppercase tracking-widest px-3 block mb-2">Staff Operations</span>
               
@@ -854,10 +886,10 @@ export const ClientDashboard = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-6 space-y-8 animate-fadeIn font-poppins text-primary">
+    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8 animate-fadeIn font-poppins text-primary">
       
       {/* Top Profile Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-6 p-6 bg-white border border-borderColor rounded-2xl shadow-sm relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 bg-white border border-borderColor rounded-2xl shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accentGold/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="flex items-center gap-4 relative z-10">
           <div className="w-16 h-16 rounded-full border-2 border-accentGold/60 bg-bgBase flex items-center justify-center font-bold font-poppins text-accentGold text-xl shadow-inner">
@@ -871,11 +903,59 @@ export const ClientDashboard = () => {
         </div>
       </div>
 
+      {/* Mobile Horizontal Tabs Row */}
+      <div className="flex lg:hidden overflow-x-auto gap-2 pb-3 px-1 border-b border-borderColor scrollbar-none snap-x snap-mandatory">
+        <button 
+          onClick={() => setActiveTab('bookings')} 
+          className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'bookings' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+          }`}
+        >
+          My Bookings ({bookings.length})
+        </button>
+        <button 
+          onClick={() => setActiveTab('tracking')} 
+          className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            activeTab === 'tracking' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+          }`}
+        >
+          Visit Tracking {activeBooking && <span className="w-1.5 h-1.5 rounded-full bg-accentGold"></span>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('estimates')} 
+          className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            activeTab === 'estimates' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+          }`}
+        >
+          Estimates {quotation && quotation.status === 'Pending' && <span className="w-1.5 h-1.5 rounded-full bg-accentGold"></span>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('reports')} 
+          className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            activeTab === 'reports' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+          }`}
+        >
+          Reports {report && <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('notifications')} 
+          className={`snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            activeTab === 'notifications' ? 'bg-primary text-white' : 'bg-bgSurface border border-borderColor text-secondary'
+          }`}
+        >
+          Notifications {notifications.filter(n => !n.is_read).length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full bg-accentGold text-white text-[8px]">
+              {notifications.filter(n => !n.is_read).length}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         
         {/* Navigation Sidebar */}
-        <div className="space-y-4 lg:col-span-1">
+        <div className="hidden lg:block space-y-4 lg:col-span-1">
           <div className="bg-white border border-borderColor rounded-2xl p-4 space-y-1">
             <span className="text-[9px] font-bold text-secondary/50 uppercase tracking-widest px-3 block mb-2">Navigation</span>
             
@@ -977,7 +1057,7 @@ export const ClientDashboard = () => {
               </div>
 
               {bookings.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {bookings.map((b) => (
                     <div
                       key={b.id}
@@ -1074,11 +1154,11 @@ export const ClientDashboard = () => {
                   <div className="md:col-span-2 space-y-6">
                     
                     {/* Stepper Card */}
-                    <div className="bg-white border border-borderColor rounded-2xl p-6 shadow-sm space-y-6 overflow-hidden">
+                    <div className="bg-white border border-borderColor rounded-2xl p-4 sm:p-6 shadow-sm space-y-6 overflow-hidden">
                       <h4 className="font-bold text-xs uppercase tracking-widest text-secondary/60">Milestone Stepper</h4>
                       
                       {/* Visual Timeline Path */}
-                      <div className="relative pl-6 border-l-2 border-[#C5A880]/30 space-y-5 py-2">
+                      <div className="relative pl-5 sm:pl-6 border-l-2 border-[#C5A880]/30 space-y-4 sm:space-y-5 py-2">
                         {OPERATIONAL_WORKFLOW.map((step, idx) => {
                           const stepStatus = getStepStatus(activeBooking.status, step);
                           return (
@@ -1355,52 +1435,79 @@ export const ClientDashboard = () => {
                     }`}>{quotation.status}</span>
                   </div>
 
-                  {/* Table of items */}
-                  <div className="p-6 space-y-6">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="border-b border-borderColor text-secondary/60 font-bold uppercase tracking-wider bg-bgBase">
-                            <th className="py-3 px-4">Description</th>
-                            <th className="py-3 px-4 text-center">Qty</th>
-                            <th className="py-3 px-4 text-right">Unit Price</th>
-                            <th className="py-3 px-4 text-right">Amount</th>
+                  {/* Table of items (Desktop/Tablet) */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-borderColor text-secondary/60 font-bold uppercase tracking-wider bg-bgBase">
+                          <th className="py-3 px-4">Description</th>
+                          <th className="py-3 px-4 text-center">Qty</th>
+                          <th className="py-3 px-4 text-right">Unit Price</th>
+                          <th className="py-3 px-4 text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-borderColor/50">
+                        {quotation.items && quotation.items.map((item, idx) => (
+                          <tr key={idx} className="hover:bg-bgBase/40">
+                            <td className="py-3.5 px-4 font-medium text-primary">{item.description}</td>
+                            <td className="py-3.5 px-4 text-center font-mono">{item.qty}</td>
+                            <td className="py-3.5 px-4 text-right font-mono">INR {item.unit_price.toLocaleString()}</td>
+                            <td className="py-3.5 px-4 text-right font-mono font-bold">INR {item.amount.toLocaleString()}</td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-borderColor/50">
-                          {quotation.items && quotation.items.map((item, idx) => (
-                            <tr key={idx} className="hover:bg-bgBase/40">
-                              <td className="py-3.5 px-4 font-medium text-primary">{item.description}</td>
-                              <td className="py-3.5 px-4 text-center font-mono">{item.qty}</td>
-                              <td className="py-3.5 px-4 text-right font-mono">INR {item.unit_price.toLocaleString()}</td>
-                              <td className="py-3.5 px-4 text-right font-mono font-bold">INR {item.amount.toLocaleString()}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-                    {/* Calculation summary */}
-                    <div className="flex justify-end pt-4 border-t border-borderColor">
-                      <div className="w-80 space-y-2.5 text-xs text-secondary">
-                        <div className="flex justify-between">
-                          <span>Subtotal</span>
-                          <span className="font-mono">INR {quotation.subtotal.toLocaleString()}</span>
+                  {/* Mobile Card List for Estimate Items */}
+                  <div className="space-y-4 md:hidden">
+                    {quotation.items && quotation.items.map((item, idx) => (
+                      <div key={idx} className="p-4 rounded-xl border border-borderColor bg-bgBase/25 space-y-2.5">
+                        <div className="flex justify-between items-start">
+                          <span className="font-bold text-primary text-xs">{item.description}</span>
+                          <span className="text-[10px] font-bold text-accentGold uppercase bg-accentGold/10 px-2 py-0.5 rounded">
+                            Item {idx + 1}
+                          </span>
                         </div>
-                        <div className="flex justify-between text-green-600">
-                          <span>Discount ({quotation.discount}%)</span>
-                          <span className="font-mono">- INR {(quotation.subtotal * quotation.discount / 100).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>GST ({quotation.gst}%)</span>
-                          <span className="font-mono">INR {quotation.tax.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-primary font-bold text-sm pt-2 border-t border-borderColor">
-                          <span>Grand Total</span>
-                          <span className="font-mono text-accentGold">INR {quotation.grand_total.toLocaleString()}</span>
+                        <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-500">
+                          <div>
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Qty</span>
+                            <span className="font-semibold text-primary font-mono">{item.qty}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Unit Price</span>
+                            <span className="font-semibold text-primary font-mono">INR {item.unit_price.toLocaleString()}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="block text-[9px] uppercase tracking-wider text-slate-400">Amount</span>
+                            <span className="font-bold text-[#1C1C1C] font-mono">INR {item.amount.toLocaleString()}</span>
+                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+
+                  {/* Calculation summary */}
+                  <div className="flex justify-end pt-4 border-t border-borderColor">
+                    <div className="w-full sm:w-80 space-y-2.5 text-xs text-secondary">
+                      <div className="flex justify-between">
+                        <span>Subtotal</span>
+                        <span className="font-mono">INR {quotation.subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-green-600">
+                        <span>Discount ({quotation.discount}%)</span>
+                        <span className="font-mono">- INR {(quotation.subtotal * quotation.discount / 100).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>GST ({quotation.gst}%)</span>
+                        <span className="font-mono">INR {quotation.tax.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-primary font-bold text-sm pt-2 border-t border-borderColor">
+                        <span>Grand Total</span>
+                        <span className="font-mono text-accentGold">INR {quotation.grand_total.toLocaleString()}</span>
+                      </div>
                     </div>
+                  </div>
 
                     {/* Approval Actions */}
                     {quotation.status === 'Pending' && activeBooking.status === 'Quotation Sent' && (
@@ -1452,8 +1559,7 @@ export const ClientDashboard = () => {
                       </div>
                     )}
                   </div>
-                </div>
-              ) : (
+                ) : (
                 <div className="bg-white border border-borderColor rounded-2xl p-12 text-center space-y-4 py-16">
                   <div className="w-16 h-16 bg-accentGold/10 rounded-full flex items-center justify-center mx-auto">
                     <FileText className="w-8 h-8 text-accentGold" />

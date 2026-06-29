@@ -32,7 +32,7 @@ export const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-poppins relative overflow-hidden text-slate-100">
+    <div className="min-h-screen bg-[#0F172A] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-poppins relative overflow-hidden text-slate-100">
       
       {/* Decorative luxury gradient spots for admin portal */}
       <div className="absolute top-[-30%] right-[-20%] w-[70%] h-[70%] rounded-full bg-blue-500/10 blur-[130px]" />
@@ -77,6 +77,7 @@ export const AdminLogin = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username email"
                   className="block w-full pl-10 pr-4 py-3 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#C5A880]/50 focus:border-[#C5A880] text-sm transition-all bg-[#0F172A]/50"
                   placeholder="admin@glorysimon.com"
                 />
@@ -97,6 +98,7 @@ export const AdminLogin = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   className="block w-full pl-10 pr-4 py-3 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#C5A880]/50 focus:border-[#C5A880] text-sm transition-all bg-[#0F172A]/50"
                   placeholder="••••••••"
                 />
