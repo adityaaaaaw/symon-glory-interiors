@@ -28,20 +28,52 @@ async function initDatabase() {
 
     const dbName = process.env.DB_NAME || 'glory_simon_booking';
 
-    console.log(`📦 Creating database "${dbName}" if not exists...`);
-    await conn.execute(
-      `CREATE DATABASE IF NOT EXISTS \`${dbName}\`
+    console.log(`📦 Dropping database "${dbName}" if exists...`);
+    await conn.query(`DROP DATABASE IF EXISTS \`${dbName}\``);
+
+    console.log(`📦 Creating database "${dbName}"...`);
+    await conn.query(
+      `CREATE DATABASE \`${dbName}\`
        CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
     );
     console.log('✅ Database ready');
 
-    await conn.execute(`USE \`${dbName}\``);
+    await conn.query(`USE \`${dbName}\``);
 
     const schemaPath = path.join(__dirname, '..', 'database.sql');
     const schema     = fs.readFileSync(schemaPath, 'utf8');
 
     console.log('📋 Running schema...');
-    await conn.query(schema);
+    
+    // Parse schema by DELIMITER commands to execute triggers and procedures correctly
+    const parts = schema.split(/DELIMITER\s+(\$\$|;)/gi);
+    let currentDelimiter = ';';
+    
+    for (let part of parts) {
+      part = part.trim();
+      if (!part) continue;
+      if (part === '$$') {
+        currentDelimiter = '$$';
+        continue;
+      }
+      if (part === ';') {
+        currentDelimiter = ';';
+        continue;
+      }
+      
+      if (currentDelimiter === '$$') {
+        const statements = part.split('$$');
+        for (let stmt of statements) {
+          stmt = stmt.trim();
+          if (stmt) {
+            await conn.query(stmt);
+          }
+        }
+      } else {
+        await conn.query(part);
+      }
+    }
+    
     console.log('✅ Schema applied successfully');
 
     console.log('\n✅ Database initialization complete!');

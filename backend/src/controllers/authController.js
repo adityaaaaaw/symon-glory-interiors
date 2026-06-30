@@ -24,7 +24,7 @@ const registerValidators = [
   body('mobile_number')
     .trim()
     .notEmpty().withMessage('Mobile number is required.')
-    .matches(/^[6-9]\d{9}$/).withMessage('Mobile number must be a valid 10-digit Indian mobile number.'),
+    .matches(/^\d{10}$/).withMessage('Please enter a valid 10-digit mobile number.'),
 
   body('email')
     .trim()
@@ -89,26 +89,57 @@ async function logActivity({ userId, action, entityType, entityId, details, req 
  * Register a new client account.
  */
 async function register(req, res) {
+  // Temporary Dev Log: Request Payload
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[DEV LOG] /api/auth/register Request Payload:', req.body);
+  }
+
   // 1. Run inline validators
   await Promise.all(registerValidators.map(v => v.run(req)));
   const errs = extractValidationErrors(req);
   if (errs) {
-    return res.status(422).json({ success: false, message: errs[0], errors: errs });
+    const errorResponse = { success: false, message: errs[0], errors: errs };
+    
+    // Temporary Dev Log: Validation Errors & HTTP Status
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DEV LOG] /api/auth/register Validation Errors:', errs);
+      console.log('[DEV LOG] /api/auth/register API Response (Status 422):', errorResponse);
+    }
+    
+    return res.status(422).json(errorResponse);
   }
 
   const { full_name, mobile_number, email, password } = req.body;
 
   try {
     // 2. Check email uniqueness
-    const [existing] = await query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
+    const [existing] = await query('SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1', [email]);
     if (existing.length > 0) {
-      return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
+      const errorResponse = { success: false, message: 'Email already registered.', field: 'email' };
+      
+      // Temporary Dev Log: Email exists
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV LOG] /api/auth/register API Response (Status 400): Email already registered.');
+      }
+      
+      return res.status(400).json(errorResponse);
     }
 
-    // 2b. Check mobile number uniqueness
-    const [existingMobile] = await query('SELECT id FROM users WHERE mobile_number = ? LIMIT 1', [mobile_number]);
+    // 2b. Check mobile number uniqueness (normalize using REPLACE and RIGHT to compare raw digits)
+    const cleanMobile = String(mobile_number || '').replace(/\D/g, '');
+    const [existingMobile] = await query(
+      "SELECT id FROM users WHERE RIGHT(REPLACE(mobile_number, ' ', ''), 10) = ? LIMIT 1",
+      [cleanMobile]
+    );
     if (existingMobile.length > 0) {
-      return res.status(409).json({ success: false, message: 'An account with this mobile number already exists.' });
+      const errorResponse = { success: false, message: 'Phone number already registered.', field: 'phone' };
+      
+      // Temporary Dev Log: Phone exists
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV LOG] /api/auth/register API Response (Status 400): Phone number already registered.');
+      }
+      
+      return res.status(400).json(errorResponse);
     }
 
     // 3. Hash password
@@ -142,7 +173,7 @@ async function register(req, res) {
       req,
     });
 
-    return res.status(201).json({
+    const successResponse = {
       success: true,
       message: 'Registration successful. Welcome to Glory Simon Interiors!',
       token,
@@ -154,13 +185,25 @@ async function register(req, res) {
         role_id      : 2,
         role_name    : 'Client',
       },
-    });
-  } catch (err) {
-    console.error('[authController.register]', err.message);
-    if (err.code === 'ER_DUP_ENTRY') {
-      return res.status(409).json({ success: false, message: 'An account with this email already exists.' });
+    };
+
+    // Temporary Dev Log: Success API Response & HTTP Status
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DEV LOG] /api/auth/register API Response (Status 201):', successResponse);
     }
-    return res.status(500).json({ success: false, message: 'Registration failed. Please try again.' });
+
+    return res.status(201).json(successResponse);
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[DEV LOG] /api/auth/register Error:', {
+        message: err.message,
+        stack: err.stack,
+        body: { full_name, email, mobile_number }
+      });
+    }
+    
+    const dbErrorMsg = err.message || 'Database connection failed.';
+    return res.status(500).json({ success: false, message: dbErrorMsg, error: process.env.NODE_ENV !== 'production' ? err.message : undefined });
   }
 }
 

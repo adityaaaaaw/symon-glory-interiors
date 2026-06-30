@@ -7,11 +7,7 @@
 --   mysql -u root -p < database.sql
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS glory_simon_booking
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
 
-USE glory_simon_booking;
 
 -- ─────────────────────────────────────────────────────────────
 -- TABLE 1: roles
@@ -420,6 +416,11 @@ CREATE TABLE IF NOT EXISTS quotations (
 -- ─────────────────────────────────────────────────────────────
 -- TRIGGERS
 -- ─────────────────────────────────────────────────────────────
+
+DROP TRIGGER IF EXISTS trg_bookings_before_insert;
+DROP TRIGGER IF EXISTS trg_quotations_before_insert;
+DROP TRIGGER IF EXISTS trg_bookings_after_insert;
+DROP TRIGGER IF EXISTS trg_bookings_after_status_update;
 
 DELIMITER $$
 

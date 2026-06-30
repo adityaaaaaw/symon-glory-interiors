@@ -14,7 +14,8 @@ const rateLimit     = require('express-rate-limit');
 const path          = require('path');
 const fs            = require('fs');
 
-const { testConnection } = require('./config/db');
+const { testConnection, query } = require('./config/db');
+const { hashPassword } = require('./utils/hashUtils');
 
 // ─── Route Imports ────────────────────────────────────────────────────────────
 const authRoutes         = require('./routes/auth.routes');
@@ -173,8 +174,41 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Startup ──────────────────────────────────────────────────────────────────
+async function ensureAdminExists() {
+  try {
+    const email = 'admin@glorysimon.com';
+    const password = 'Admin@123';
+    const hashedPassword = await hashPassword(password);
+    
+    // Check if the administrator already exists
+    const [rows] = await query('SELECT id FROM users WHERE email = ? LIMIT 1', [email]);
+    if (rows.length === 0) {
+      // Create a default administrator (role_id = 1 is Admin)
+      await query(
+        `INSERT INTO users (email, password_hash, role_id, full_name, mobile_number, is_active, created_at, updated_at)
+         VALUES (?, ?, 1, 'Glory Simon', '+919876500001', 1, NOW(), NOW())`,
+        [email, hashedPassword]
+      );
+    } else {
+      // Update existing admin's password to Admin@123
+      const adminId = rows[0].id;
+      await query(
+        'UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?',
+        [hashedPassword, adminId]
+      );
+    }
+
+    console.log('Default Administrator');
+    console.log(`Email: ${email}`);
+    console.log(`Password: ${password}`);
+  } catch (err) {
+    console.error('Failed to ensure default administrator exists:', err.message);
+  }
+}
+
 async function startServer() {
   await testConnection();
+  await ensureAdminExists();
 
   app.listen(PORT, () => {
     console.log('\n══════════════════════════════════════════════════');

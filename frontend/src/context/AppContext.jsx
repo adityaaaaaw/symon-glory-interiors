@@ -90,19 +90,29 @@ export const AppProvider = ({ children }) => {
     try {
       const res = await api.post('/auth/login', { email, password });
       
+      // Flatten the response user details for frontend compatibility
+      const flatUserData = {
+        token: res.data.token,
+        id: res.data.user.id,
+        name: res.data.user.full_name,
+        email: res.data.user.email,
+        role: res.data.user.role_name.toLowerCase(),
+        phone: res.data.user.mobile_number
+      };
+
       // Store token and user details in localStorage
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data));
+      localStorage.setItem('token', flatUserData.token);
+      localStorage.setItem('user', JSON.stringify(flatUserData));
       
-      setUser(res.data);
-      showToast(`Welcome, ${res.data.name}!`, 'success');
+      setUser(flatUserData);
+      showToast(`Welcome, ${flatUserData.name}!`, 'success');
       
-      if (res.data.role === 'admin') {
+      if (flatUserData.role === 'admin') {
         setCurrentTab('crm');
       } else {
         setCurrentTab('portal');
       }
-      return { success: true };
+      return { success: true, role: flatUserData.role };
     } catch (error) {
       const errMsg = error.response?.data?.message || 'Authentication failed. Please verify credentials.';
       showToast(errMsg, 'error');
@@ -114,40 +124,62 @@ export const AppProvider = ({ children }) => {
 
   // Register client handler
   const register = async (name, email, password, phone) => {
+    // Temporary Dev Log: Request Payload
+    if (import.meta.env.DEV) {
+      console.log('[DEV LOG] Register Request Payload:', { name, email, password, phone });
+    }
+
     setLoading(true);
     try {
       const payload = {
-        name,
+        full_name: name,
         email,
         password,
-        phone
+        mobile_number: phone
       };
 
       const res = await api.post('/auth/register', payload);
-      const userData = res.data;
+      
+      // Flatten response user details for frontend compatibility
+      const flatUserData = {
+        token: res.data.token,
+        id: res.data.user.id,
+        name: res.data.user.full_name,
+        email: res.data.user.email,
+        role: res.data.user.role_name.toLowerCase(),
+        phone: res.data.user.mobile_number
+      };
 
-      localStorage.setItem('token', userData.token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Temporary Dev Log: Success response and status
+      if (import.meta.env.DEV) {
+        console.log('[DEV LOG] Register API Success:', {
+          status: 201,
+          data: res.data
+        });
+      }
 
-      setUser(userData);
-      showToast(`Account created, welcome ${userData.name}!`, 'success');
+      localStorage.setItem('token', flatUserData.token);
+      localStorage.setItem('user', JSON.stringify(flatUserData));
+
+      setUser(flatUserData);
+      showToast(`Account created, welcome ${flatUserData.name}!`, 'success');
       setCurrentTab('portal');
-      return { success: true, user: userData };
+      return { success: true, user: flatUserData };
     } catch (error) {
       const status = error.response?.status;
       const errMsg = error.response?.data?.message || error.response?.data?.error || error.message || 'Registration failed.';
       const field = error.response?.data?.field || null;
 
+      // Temporary Dev Log: Failure response and status
       if (import.meta.env.DEV) {
-        console.error('Registration failed', {
+        console.error('[DEV LOG] Register API Failure:', {
           status,
+          data: error.response?.data,
           message: errMsg,
-          response: error.response?.data,
           error: error.message
         });
       }
 
-      showToast(errMsg, 'error');
       return { success: false, message: errMsg, field };
     } finally {
       setLoading(false);
