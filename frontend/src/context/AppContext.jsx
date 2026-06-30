@@ -54,7 +54,7 @@ export const AppProvider = ({ children }) => {
     setLoading(true);
     try {
       // Fetch bookings
-      const bookRes = await api.get(`/bookings?client_id=${user.id}&role=${user.role}`);
+      const bookRes = await api.get('/bookings');
       setBookings(bookRes.data);
 
       // Fetch professionals

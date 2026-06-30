@@ -27,6 +27,7 @@ const dashboardRoutes    = require('./routes/dashboard.routes');
 const calendarRoutes     = require('./routes/calendar.routes');
 const notificationRoutes = require('./routes/notification.routes');
 const aiRoutes           = require('./routes/ai.routes');
+const adminRoutes        = require('./routes/admin.routes');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -123,6 +124,7 @@ app.use('/api/dashboard',     dashboardRoutes);
 app.use('/api/calendar',      calendarRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/ai',            aiRoutes);
+app.use('/api/admin',         adminRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

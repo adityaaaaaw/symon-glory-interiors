@@ -152,18 +152,37 @@ async function createBooking(req, res) {
     num_rooms,
     estimated_budget,
     project_description,
+    email, // optional for Client, required for Admin booking
   } = req.body;
 
   try {
-    // 2. Fetch client_id from clients table
-    const [clientRows] = await query(
-      'SELECT id FROM clients WHERE user_id = ? LIMIT 1',
-      [clientUserId],
-    );
-    if (clientRows.length === 0) {
-      return res.status(403).json({ success: false, message: 'Client profile not found. Please contact support.' });
+    let clientId;
+    if (req.user.role_name === 'Admin') {
+      const targetEmail = email || req.body.client_email;
+      if (!targetEmail) {
+        return res.status(400).json({ success: false, message: 'Client email is required for administrator bookings.' });
+      }
+      const [clientRows] = await query(
+        `SELECT c.id FROM clients c
+         JOIN users u ON c.user_id = u.id
+         WHERE u.email = ? LIMIT 1`,
+        [targetEmail.trim()]
+      );
+      if (clientRows.length === 0) {
+        return res.status(404).json({ success: false, message: `No client account found with email "${targetEmail}".` });
+      }
+      clientId = clientRows[0].id;
+    } else {
+      // Client role - get client profile of logged-in user
+      const [clientRows] = await query(
+        'SELECT id FROM clients WHERE user_id = ? LIMIT 1',
+        [req.user.id],
+      );
+      if (clientRows.length === 0) {
+        return res.status(403).json({ success: false, message: 'Client profile not found. Please contact support.' });
+      }
+      clientId = clientRows[0].id;
     }
-    const clientId = clientRows[0].id;
 
     // 3. Verify project type exists and is active
     const [ptRows] = await query(
@@ -251,10 +270,13 @@ async function createBooking(req, res) {
     );
     const booking = bookingRows[0];
 
-    // 9. Fetch client user info for notifications
+    // 9. Fetch client user info for notifications (resolving client's user ID from clients table)
     const [userRows] = await query(
-      'SELECT full_name, email, mobile_number FROM users WHERE id = ? LIMIT 1',
-      [clientUserId],
+      `SELECT u.id, u.full_name, u.email, u.mobile_number 
+       FROM users u
+       JOIN clients c ON c.user_id = u.id
+       WHERE c.id = ? LIMIT 1`,
+      [clientId],
     );
     const clientUser = userRows[0];
 
@@ -279,9 +301,9 @@ async function createBooking(req, res) {
       console.warn('[createBooking] WhatsApp notification failed:', waErr.message);
     }
 
-    // 11. Create in-app notification
+    // 11. Create in-app notification for the client
     await createNotification({
-      userId   : clientUserId,
+      userId   : clientUser.id,
       bookingId: newBookingId,
       title    : 'Booking Confirmed',
       message  : `Your site visit booking ${bookingRef} has been received and is pending confirmation.`,
@@ -345,6 +367,21 @@ async function getAllBookings(req, res) {
     const conditions = [];
     const params     = [];
 
+    // Role-based authorization & filtering (determined strictly from JWT token)
+    const userRole = req.user.role_name;
+    const userId = req.user.id;
+
+    if (userRole === 'Client') {
+      conditions.push('client_user_id = ?');
+      params.push(userId);
+    } else if (userRole === 'Designer') {
+      conditions.push('designer_user_id = ?');
+      params.push(userId);
+    } else if (userRole === 'Site Engineer') {
+      conditions.push('engineer_user_id = ?');
+      params.push(userId);
+    }
+
     if (status && VALID_STATUSES.includes(status)) {
       conditions.push('status = ?');
       params.push(status);
@@ -362,7 +399,7 @@ async function getAllBookings(req, res) {
       params.push(Number(project_type_id));
     }
     if (search && search.trim()) {
-      conditions.push('(booking_ref LIKE ? OR client_full_name LIKE ? OR client_mobile LIKE ?)');
+      conditions.push('(booking_ref LIKE ? OR client_name LIKE ? OR client_mobile LIKE ?)');
       const like = `%${search.trim()}%`;
       params.push(like, like, like);
     }

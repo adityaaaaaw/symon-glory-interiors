@@ -24,7 +24,6 @@ const { requireRole, requireAnyRole } = require('../middleware/roleMiddleware');
 router.get(
   '/',
   authenticate,
-  requireAnyRole('Admin', 'Designer', 'Site Engineer'),
   controller.getAllBookings,
 );
 
@@ -38,7 +37,7 @@ router.get(
 router.post(
   '/',
   authenticate,
-  requireRole('Client'),
+  requireAnyRole('Admin', 'Client'),
   controller.createBooking,
 );
 

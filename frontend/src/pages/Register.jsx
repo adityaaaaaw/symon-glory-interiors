@@ -125,7 +125,7 @@ export const Register = () => {
     let val = e.target.value;
 
     // Allow user to clear input completely
-    if (val === '') {
+    if (val === '' || val === '+' || val === '+9' || val === '+91' || val === '+91 ') {
       setPhone('');
       if (touched.phone) {
         validateField('phone', '');
@@ -133,24 +133,28 @@ export const Register = () => {
       return;
     }
 
-    // Strip non-digits
-    let cleanVal = val.replace(/\D/g, '');
-
-    // Normalize: remove +91, 91 or 0 prefixes if length suggests they were pasted/typed as country codes
-    if (cleanVal.startsWith('91') && cleanVal.length > 10) {
-      cleanVal = cleanVal.slice(2);
-    } else if (cleanVal.startsWith('0') && cleanVal.length > 10) {
-      cleanVal = cleanVal.slice(1);
+    // Strip country code prefixes first
+    let rawInput = val;
+    if (rawInput.startsWith('+91 ')) {
+      rawInput = rawInput.slice(4);
+    } else if (rawInput.startsWith('+91')) {
+      rawInput = rawInput.slice(3);
+    } else if (rawInput.startsWith('91') && rawInput.length > 10) {
+      rawInput = rawInput.slice(2);
+    } else if (rawInput.startsWith('0') && rawInput.length > 10) {
+      rawInput = rawInput.slice(1);
     }
 
-    // Slice to maximum of 10 digits
-    cleanVal = cleanVal.slice(0, 10);
+    // Now extract only digits
+    let cleanVal = rawInput.replace(/\D/g, '').slice(0, 10);
 
     setPhone(cleanVal);
     if (touched.phone) {
       validateField('phone', cleanVal);
     }
   };
+
+  const displayPhone = phone ? `+91 ${phone}` : '';
 
   const handlePasswordChange = (e) => {
     const val = e.target.value;
@@ -338,9 +342,9 @@ export const Register = () => {
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  maxLength="10"
+                  maxLength="14"
                   required
-                  value={phone}
+                  value={displayPhone}
                   onChange={handlePhoneChange}
                   onBlur={() => {
                     setTouched(prev => ({ ...prev, phone: true }));
@@ -350,7 +354,7 @@ export const Register = () => {
                   aria-invalid={touched.phone && errors.phone ? "true" : "false"}
                   aria-describedby={touched.phone && errors.phone ? "phone-error" : undefined}
                   className={`${getInputClassName('phone')} min-h-[48px]`}
-                  placeholder="7013218110"
+                  placeholder="+91 9876543210"
                 />
               </div>
               {touched.phone && errors.phone && (

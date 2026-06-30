@@ -502,6 +502,8 @@ SELECT
   b.pincode,
   b.created_at,
   b.updated_at,
+  b.client_id,
+  c.user_id                AS client_user_id,
   u.full_name              AS client_name,
   u.email                  AS client_email,
   u.mobile_number          AS client_mobile,

@@ -125,11 +125,10 @@ async function register(req, res) {
       return res.status(400).json(errorResponse);
     }
 
-    // 2b. Check mobile number uniqueness (normalize using REPLACE and RIGHT to compare raw digits)
-    const cleanMobile = String(mobile_number || '').replace(/\D/g, '');
+    // 2b. Check mobile number uniqueness
     const [existingMobile] = await query(
-      "SELECT id FROM users WHERE RIGHT(REPLACE(mobile_number, ' ', ''), 10) = ? LIMIT 1",
-      [cleanMobile]
+      "SELECT id FROM users WHERE mobile_number = ? LIMIT 1",
+      [mobile_number]
     );
     if (existingMobile.length > 0) {
       const errorResponse = { success: false, message: 'Phone number already registered.', field: 'phone' };

@@ -109,6 +109,16 @@ const authMiddleware = async (req, res, next) => {
       is_active: user.is_active,
     };
 
+    // Temporary Dev Logging
+    if (process.env.NODE_ENV !== 'production') {
+      console.log({
+        endpoint: req.originalUrl,
+        method: req.method,
+        user: req.user,
+        authorization: authHeader
+      });
+    }
+
     next();
   } catch (error) {
     console.error('[authMiddleware] Unexpected error:', error.message);
