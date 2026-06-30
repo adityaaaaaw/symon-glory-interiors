@@ -12,7 +12,6 @@ export const Register = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState(''); // Stores raw 10 digits
   const [password, setPassword] = useState('');
-  const phoneInputRef = useRef(null);
   
   // UX states
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +50,15 @@ export const Register = () => {
 
   const validatePhone = (val) => {
     if (!val) return 'Phone Number is required.';
-    if (!/^\d{10}$/.test(val)) return 'Please enter a valid 10-digit mobile number.';
+    let clean = String(val).replace(/\D/g, '');
+    if (clean.startsWith('91') && clean.length > 10) {
+      clean = clean.slice(2);
+    } else if (clean.startsWith('0') && clean.length > 10) {
+      clean = clean.slice(1);
+    }
+    if (!/^[6-9]\d{9}$/.test(clean)) {
+      return 'Please enter a valid 10-digit mobile number.';
+    }
     return '';
   };
 
@@ -115,10 +122,10 @@ export const Register = () => {
   };
 
   const handlePhoneChange = (e) => {
-    const inputVal = e.target.value;
+    let val = e.target.value;
 
-    // If empty or user backspaced into the prefix
-    if (inputVal === '' || inputVal === '+' || inputVal === '+9' || inputVal === '+91' || inputVal === '+91 ') {
+    // Allow user to clear input completely
+    if (val === '') {
       setPhone('');
       if (touched.phone) {
         validateField('phone', '');
@@ -126,60 +133,23 @@ export const Register = () => {
       return;
     }
 
-    // Get cursor selection before we modify state
-    const cursorPosition = e.target.selectionStart ?? inputVal.length;
+    // Strip non-digits
+    let cleanVal = val.replace(/\D/g, '');
 
-    // Count how many actual phone digits were before the cursor
-    let sliceBeforeCursor = inputVal.slice(0, cursorPosition);
-    if (sliceBeforeCursor.startsWith('+91')) {
-      sliceBeforeCursor = sliceBeforeCursor.slice(3);
-    } else if (sliceBeforeCursor.startsWith('+9')) {
-      sliceBeforeCursor = sliceBeforeCursor.slice(2);
-    } else if (sliceBeforeCursor.startsWith('+')) {
-      sliceBeforeCursor = sliceBeforeCursor.slice(1);
-    }
-    const digitsBeforeCursor = sliceBeforeCursor.replace(/\D/g, '').length;
-
-    // Extract raw phone digits
-    let rawInput = inputVal;
-    if (rawInput.startsWith('+91')) {
-      rawInput = rawInput.slice(3);
-    } else if (rawInput.startsWith('91') && rawInput.length > 10) {
-      rawInput = rawInput.slice(2);
-    } else if (rawInput.startsWith('0') && rawInput.length > 10) {
-      rawInput = rawInput.slice(1);
-    }
-    
-    // Clean all non-digits
-    let digits = rawInput.replace(/\D/g, '').slice(0, 10);
-
-    // Detect backspace on formatting characters (e.g., spaces or prefix)
-    let updatedDigits = digits;
-    if (digits.length === phone.length && inputVal.length < displayPhone.length) {
-      if (cursorPosition === 9 && phone.length > 5) {
-        updatedDigits = digits.slice(0, 4) + digits.slice(5);
-      } else if (cursorPosition === 3 || cursorPosition === 4) {
-        updatedDigits = '';
-      }
+    // Normalize: remove +91, 91 or 0 prefixes if length suggests they were pasted/typed as country codes
+    if (cleanVal.startsWith('91') && cleanVal.length > 10) {
+      cleanVal = cleanVal.slice(2);
+    } else if (cleanVal.startsWith('0') && cleanVal.length > 10) {
+      cleanVal = cleanVal.slice(1);
     }
 
-    setPhone(updatedDigits);
+    // Slice to maximum of 10 digits
+    cleanVal = cleanVal.slice(0, 10);
+
+    setPhone(cleanVal);
     if (touched.phone) {
-      validateField('phone', updatedDigits);
+      validateField('phone', cleanVal);
     }
-
-    // Calculate the new cursor position in the formatted output
-    const newDigitsBeforeCursor = Math.min(digitsBeforeCursor, updatedDigits.length);
-    const nextCaret = newDigitsBeforeCursor === 0 ? 0 : 
-                      newDigitsBeforeCursor <= 5 ? 4 + newDigitsBeforeCursor : 
-                      5 + newDigitsBeforeCursor;
-
-    requestAnimationFrame(() => {
-      const inputElement = phoneInputRef.current;
-      if (inputElement) {
-        inputElement.setSelectionRange(nextCaret, nextCaret);
-      }
-    });
   };
 
   const handlePasswordChange = (e) => {
@@ -197,16 +167,6 @@ export const Register = () => {
       showToast('Pasting strings longer than 64 characters is not allowed.', 'error');
     }
   };
-
-  // Format phone number for UI display only: +91 XXXXX XXXXX
-  const formatPhoneForDisplay = (raw) => {
-    const digits = String(raw || '').replace(/\D/g, '').slice(0, 10);
-    if (!digits) return '';
-    if (digits.length > 5) return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
-    return `+91 ${digits}`;
-  };
-
-  const displayPhone = formatPhoneForDisplay(phone);
 
   // Calculate live password strength
   const getPasswordStrength = (val) => {
@@ -374,14 +334,13 @@ export const Register = () => {
                   <Phone className="h-4 w-4 text-[#C5A880]" />
                 </div>
                 <input
-                  ref={phoneInputRef}
                   id="phone"
                   type="tel"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  maxLength="14"
+                  maxLength="10"
                   required
-                  value={displayPhone}
+                  value={phone}
                   onChange={handlePhoneChange}
                   onBlur={() => {
                     setTouched(prev => ({ ...prev, phone: true }));
@@ -391,7 +350,7 @@ export const Register = () => {
                   aria-invalid={touched.phone && errors.phone ? "true" : "false"}
                   aria-describedby={touched.phone && errors.phone ? "phone-error" : undefined}
                   className={`${getInputClassName('phone')} min-h-[48px]`}
-                  placeholder="+91 98765 43210"
+                  placeholder="7013218110"
                 />
               </div>
               {touched.phone && errors.phone && (
